@@ -41,12 +41,12 @@ import {
 
 // ─── ⚠️ SUBSTITUA AQUI COM AS SUAS CREDENCIAIS FIREBASE ───
 const firebaseConfig = {
-  apiKey:            "SUA_API_KEY",
-  authDomain:        "SEU_PROJETO.firebaseapp.com",
-  projectId:         "SEU_PROJETO",
-  storageBucket:     "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId:             "SEU_APP_ID"
+  apiKey:            "AIzaSyBFD5KZ8sGfvXU-evgdRZMRMDOxsr0d1uo",
+  authDomain:        "sons-bwe-fixes-20ea5.firebaseapp.com",
+  projectId:         "sons-bwe-fixes-20ea5",
+  storageBucket:     "sons-bwe-fixes-20ea5.firebasestorage.app",
+  messagingSenderId: "866364254394",
+  appId:             "1:866364254394:web:c124524c368f1504ceba8"
 };
 
 // ─── INICIALIZAR ───
