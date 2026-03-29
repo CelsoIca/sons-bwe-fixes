@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar | Sons Bwe Fixes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .input-sbf {
+      width:100%; background:rgba(255,255,255,.05);
+      border:1px solid rgba(49,69,149,.35);
+      border-radius:1rem; padding:1rem 1.25rem;
+      color:#fff; font-family:'Barlow Condensed',sans-serif;
+      font-size:1rem; outline:none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-sbf:focus {
+      border-color:#ec9731;
+      box-shadow: 0 0 0 3px rgba(236,151,49,.15);
+    }
+    .btn-orange {
+      width:100%; background:#ec9731; color:#fff; border:none;
+      border-radius:1rem; padding:1rem;
+      font-family:'Anton',sans-serif; font-size:1.1rem;
+      letter-spacing:2px; cursor:pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-orange:hover  { transform:translateY(-2px); box-shadow:0 8px 24px rgba(236,151,49,.35); }
+    .btn-orange:active { transform:scale(.97); }
+    .btn-orange:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .tab-active { background:rgba(49,69,149,.5); color:#fff; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4"
+      style="background:linear-gradient(135deg,#0d1220 0%,#192035 60%,#0e1525 100%)">
+
+  <div class="glass w-full max-w-sm rounded-[2.5rem] p-10 border border-[rgba(49,69,149,.3)] shadow-2xl animate-fade-in">
+
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div style="font-family:'Anton',sans-serif;font-size:1.4rem;letter-spacing:2px;text-transform:uppercase;">SONS BWE</div>
+      <div style="font-family:'Anton',sans-serif;font-size:1.85rem;color:#ec9731;letter-spacing:3px;text-transform:uppercase;line-height:1">FIXES</div>
+      <p style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;color:rgba(255,255,255,.35);letter-spacing:4px;text-transform:uppercase;margin-top:6px;">Bem-vindo à Família</p>
+    </div>
+
+    <!-- Tabs Login / Registar -->
+    <div class="flex rounded-xl p-1 mb-7" style="background:rgba(255,255,255,.05)">
+      <button id="tab-login" onclick="setTab('login')"
+        class="tab-active flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-widest transition"
+        style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;border:none;cursor:pointer;color:#fff">
+        Entrar
+      </button>
+      <button id="tab-reg" onclick="setTab('register')"
+        class="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-widest transition"
+        style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;border:none;cursor:pointer;color:rgba(255,255,255,.4);background:transparent">
+        Registar
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Nome (só no registo) -->
+      <div id="field-nome" class="hidden">
+        <input class="input-sbf" type="text" id="user-name" placeholder="Teu nome / nickname">
+      </div>
+      <input class="input-sbf" type="email"    id="user-email" placeholder="Email">
+      <input class="input-sbf" type="password" id="user-pass"  placeholder="Password">
+
+      <!-- Erro -->
+      <div id="auth-error" class="hidden rounded-xl px-4 py-3 text-sm"
+           style="background:rgba(239,60,84,.12);border:1px solid rgba(239,60,84,.3);color:#ff8899;font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em"></div>
+
+      <button id="auth-btn" onclick="handleAuth()" class="btn-orange" style="margin-top:8px">
+        ENTRAR
+      </button>
+
+      <!-- Separador -->
+      <div class="flex items-center gap-3 my-2">
+        <div class="flex-1 h-px" style="background:rgba(255,255,255,.08)"></div>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase">ou</span>
+        <div class="flex-1 h-px" style="background:rgba(255,255,255,.08)"></div>
+      </div>
+
+      <!-- Google -->
+      <button onclick="loginGoogle()"
+        class="w-full flex items-center justify-center gap-3 py-3 rounded-2xl font-bold transition"
+        style="background:#fff;color:#333;border:none;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;letter-spacing:.04em;cursor:pointer">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.7 0 6.8 5.4 3 13.3l7.8 6C12.8 13.2 17.9 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-9.9 7.1-17z"/>
+          <path fill="#FBBC05" d="M10.8 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.7-4.7L2.4 13.3A24 24 0 0 0 0 24c0 3.8.9 7.4 2.4 10.7l8.4-6z"/>
+          <path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.3-7.7 2.3-6.1 0-11.2-3.7-13.2-9L2.4 36c3.8 7.9 11.7 12 21.6 12z"/>
+        </svg>
+        Continuar com Google
+      </button>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="mt-8 pt-6 flex flex-col items-center gap-3" style="border-top:1px solid rgba(49,69,149,.25)">
+      <a href="recuperar.html"
+         style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;text-decoration:none"
+         onmouseover="this.style.color='#ec9731'" onmouseout="this.style.color='rgba(255,255,255,.35)'">
+        Esqueci a password
+      </a>
+      <a href="index.html"
+         style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:rgba(255,255,255,.25);letter-spacing:.08em;text-transform:uppercase;text-decoration:none"
+         onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.25)'">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Voltar à Home
+      </a>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="opacity-0 scale-90 pointer-events-none">
+    <div class="glass border px-8 py-4 rounded-[2rem] shadow-2xl flex items-center gap-4 min-w-[280px]"
+         style="border-color:rgba(49,69,149,.35)">
+      <div id="toast-icon-box" class="w-10 h-10 rounded-full flex items-center justify-center">
+        <i id="toast-icon" class="fa-solid"></i>
+      </div>
+      <div>
+        <p id="toast-title" class="font-bold text-xs uppercase tracking-widest text-white" style="font-family:'Barlow Condensed',sans-serif"></p>
+        <p id="toast-msg"   class="text-xs mt-0.5" style="color:rgba(255,255,255,.6);font-family:'Barlow Condensed',sans-serif"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    // ─── Tabs ───
+    let modoActual = 'login';
+
+    function setTab(modo) {
+      modoActual = modo;
+      const isLogin = modo === 'login';
+
+      // UI tabs
+      document.getElementById('tab-login').className = (isLogin ? 'tab-active ' : '') +
+        'flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-widest transition';
+      document.getElementById('tab-login').style.cssText = isLogin
+        ? 'background:rgba(49,69,149,.5);color:#fff;border:none;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:.12em'
+        : 'background:transparent;color:rgba(255,255,255,.4);border:none;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:.12em';
+      document.getElementById('tab-reg').style.cssText = !isLogin
+        ? 'background:rgba(49,69,149,.5);color:#fff;border:none;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:.12em'
+        : 'background:transparent;color:rgba(255,255,255,.4);border:none;cursor:pointer;font-family:Barlow Condensed,sans-serif;letter-spacing:.12em';
+
+      document.getElementById('field-nome').classList.toggle('hidden', isLogin);
+      document.getElementById('auth-btn').textContent = isLogin ? 'ENTRAR' : 'CRIAR CONTA';
+      document.getElementById('auth-error').classList.add('hidden');
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('auth-error');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    // ─── Auth Principal ───
+    async function handleAuth() {
+      const email = document.getElementById('user-email').value.trim();
+      const pass  = document.getElementById('user-pass').value;
+      const nome  = document.getElementById('user-name').value.trim();
+      const btn   = document.getElementById('auth-btn');
+
+      if (!email || !pass) return showError('Preenche email e password.');
+      if (modoActual === 'register' && !nome) return showError('Precisamos do teu nome.');
+
+      btn.textContent = 'A PROCESSAR...';
+      btn.disabled = true;
+      document.getElementById('auth-error').classList.add('hidden');
+
+      try {
+        if (modoActual === 'login') {
+          const cred = await auth.signInWithEmailAndPassword(email, pass);
+          const snap = await db.collection('users').doc(cred.user.uid).get();
+          if (snap.exists && snap.data().ativo === false) {
+            await auth.signOut();
+            return showError('Esta conta foi suspensa pelo administrador.');
+          }
+          window.location.href = 'index.html';
+
+        } else {
+          const cred = await auth.createUserWithEmailAndPassword(email, pass);
+          await db.collection('users').doc(cred.user.uid).set({
+            nome, email,
+            role: 'user',
+            ativo: true,
+            fotoUrl: '',
+            localizacao: '',
+            contacto: '',
+            gostos: '',
+            dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast('Bem-vindo!', 'Conta criada com sucesso 🎉', 'success');
+          setTimeout(() => window.location.href = 'index.html', 1500);
+        }
+      } catch (err) {
+        showError(traduzirErro(err.code));
+      } finally {
+        btn.textContent = modoActual === 'login' ? 'ENTRAR' : 'CRIAR CONTA';
+        btn.disabled = false;
+      }
+    }
+
+    // ─── Google ───
+    async function loginGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        const result = await auth.signInWithPopup(provider);
+        const user   = result.user;
+        const snap   = await db.collection('users').doc(user.uid).get();
+        if (!snap.exists) {
+          await db.collection('users').doc(user.uid).set({
+            nome: user.displayName || 'Utilizador',
+            email: user.email,
+            fotoUrl: user.photoURL || '',
+            role: 'user', ativo: true,
+            localizacao: '', contacto: '', gostos: '',
+            dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } else if (snap.data().ativo === false) {
+          await auth.signOut();
+          return showError('Esta conta foi suspensa.');
+        }
+        window.location.href = 'index.html';
+      } catch (err) {
+        showError(traduzirErro(err.code));
+      }
+    }
+
+    // Enter key
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleAuth(); });
+
+    // Redirecionar se já logado
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
