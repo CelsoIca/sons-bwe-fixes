@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar Acesso | Sons Bwe Fixes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .input-sbf {
+      width:100%; background:rgba(255,255,255,.05);
+      border:1px solid rgba(49,69,149,.35); border-radius:1rem;
+      padding:1rem 1.25rem; color:#fff;
+      font-family:'Barlow Condensed',sans-serif; font-size:1rem; outline:none;
+      transition: border-color .2s, box-shadow .2s; text-align:center;
+    }
+    .input-sbf:focus { border-color:#ec9731; box-shadow:0 0 0 3px rgba(236,151,49,.15); }
+    .input-sbf::placeholder { color:rgba(255,255,255,.3); }
+    .btn-main {
+      width:100%; background:#fff; color:#0d1220; border:none;
+      border-radius:1rem; padding:1rem;
+      font-family:'Anton',sans-serif; font-size:1rem; letter-spacing:2px;
+      cursor:pointer; transition: background .2s, transform .2s;
+    }
+    .btn-main:hover  { background:#e8e8e8; transform:scale(1.02); }
+    .btn-main:active { transform:scale(.97); }
+    .btn-main:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4"
+      style="background:linear-gradient(135deg,#0d1220 0%,#192035 60%,#0e1525 100%)">
+
+  <div class="glass w-full max-w-xs rounded-[2.5rem] p-10 border text-center animate-fade-in relative overflow-hidden"
+       style="border-color:rgba(49,69,149,.3)">
+
+    <!-- Glow decorativo -->
+    <div class="absolute -top-12 -left-12 w-40 h-40 rounded-full"
+         style="background:rgba(236,151,49,.08);filter:blur(50px);pointer-events:none"></div>
+
+    <!-- Ícone -->
+    <div class="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+         style="background:rgba(236,151,49,.15)">
+      <i class="fa-solid fa-key text-2xl" style="color:#ec9731"></i>
+    </div>
+
+    <!-- Título -->
+    <h1 style="font-family:'Anton',sans-serif;font-size:2rem;letter-spacing:2px;text-transform:uppercase;color:#ec9731;margin-bottom:8px">
+      RECUPERAR
+    </h1>
+    <p style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:rgba(255,255,255,.35);letter-spacing:3px;text-transform:uppercase;line-height:1.6;margin-bottom:2rem">
+      Introduz o teu e‑mail para receberes<br>o link de redefinição
+    </p>
+
+    <form id="recover-form" class="space-y-4">
+      <input class="input-sbf" type="email" id="recover-email" placeholder="O teu e-mail de conta" required>
+
+      <!-- Erro -->
+      <div id="rec-error" class="hidden rounded-xl px-4 py-3 text-sm"
+           style="background:rgba(239,60,84,.12);border:1px solid rgba(239,60,84,.3);color:#ff8899;font-family:'Barlow Condensed',sans-serif"></div>
+
+      <button type="submit" id="btn-recover" class="btn-main">ENVIAR LINK</button>
+    </form>
+
+    <!-- Sucesso (oculto) -->
+    <div id="success-msg" class="hidden mt-4 rounded-xl px-4 py-3"
+         style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25)">
+      <i class="fa-solid fa-circle-check mr-2" style="color:#4ade80"></i>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:#4ade80">Link enviado! Verifica o teu e-mail.</span>
+    </div>
+
+    <div class="mt-8 pt-6" style="border-top:1px solid rgba(49,69,149,.25)">
+      <a href="login.html"
+         style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;text-decoration:none"
+         onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.35)'">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Voltar ao Login
+      </a>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="opacity-0 scale-90 pointer-events-none">
+    <div class="glass border px-8 py-4 rounded-[2rem] shadow-2xl flex items-center gap-4 min-w-[280px]"
+         style="border-color:rgba(49,69,149,.35)">
+      <div id="toast-icon-box" class="w-10 h-10 rounded-full flex items-center justify-center">
+        <i id="toast-icon" class="fa-solid"></i>
+      </div>
+      <div>
+        <p id="toast-title" class="font-bold text-xs uppercase tracking-widest" style="font-family:'Barlow Condensed',sans-serif"></p>
+        <p id="toast-msg"   class="text-xs mt-0.5" style="color:rgba(255,255,255,.6);font-family:'Barlow Condensed',sans-serif"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    document.getElementById('recover-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn   = document.getElementById('btn-recover');
+      const email = document.getElementById('recover-email').value.trim();
+      const errEl = document.getElementById('rec-error');
+      const okEl  = document.getElementById('success-msg');
+
+      if (!email) {
+        errEl.textContent = 'Introduz o teu endereço de e-mail.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      btn.textContent = 'A ENVIAR...';
+      btn.disabled = true;
+      errEl.classList.add('hidden');
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        okEl.classList.remove('hidden');
+        btn.textContent = 'ENVIADO ✓';
+        showToast('Sucesso', 'Verifica a tua caixa de entrada.', 'success');
+      } catch (err) {
+        const msgs = {
+          'auth/user-not-found': 'E-mail não encontrado.',
+          'auth/invalid-email':  'E-mail inválido.'
+        };
+        errEl.textContent = msgs[err.code] || 'Ocorreu um erro. Tenta novamente.';
+        errEl.classList.remove('hidden');
+        btn.textContent = 'TENTAR NOVAMENTE';
+        btn.disabled = false;
+      }
+    });
+
+    // Não redirecionar se está em recuperação
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
