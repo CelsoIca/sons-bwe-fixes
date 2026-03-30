@@ -5,142 +5,383 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sons Bwe Fixes — Music Streaming</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
+<style>
+/* ── Variáveis locais (completam o style.css) ── */
+:root{
+  --sidebar:260px; --player-h:90px;
+  --font-d:'Anton',sans-serif; --font-b:'Barlow Condensed',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);font-size:16px;background:#0d1220;color:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── APP SHELL ── */
+.app-shell{display:flex;flex:1;overflow:hidden;padding-bottom:var(--player-h)}
+.sidebar{width:var(--sidebar);background:#0e1525;border-right:1px solid rgba(49,69,149,.25);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;z-index:10}
+.sidebar::-webkit-scrollbar{width:3px}.sidebar::-webkit-scrollbar-thumb{background:rgba(49,69,149,.4);border-radius:3px}
+.logo{padding:24px 22px 16px;font-family:var(--font-d);line-height:1.05;text-transform:uppercase;font-size:1.45rem;letter-spacing:1px}
+.logo span{color:#ec9731;display:block;font-size:1.8rem;letter-spacing:2px}
+.nav-section{padding:6px 10px}
+.nav-label{font-family:var(--font-b);font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,.28);padding:8px 12px 5px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:11px;cursor:pointer;color:rgba(255,255,255,.5);font-family:var(--font-b);font-size:.98rem;font-weight:500;letter-spacing:.04em;transition:all .2s;position:relative}
+.nav-item:hover{background:rgba(49,69,149,.18);color:#fff}
+.nav-item.active{background:rgba(49,69,149,.3);color:#ec9731}
+.nav-item .ico{font-size:1rem;width:20px;text-align:center}
+.nav-item .badge{margin-left:auto;background:#ec9731;color:#fff;font-family:var(--font-d);font-size:.62rem;padding:2px 7px;border-radius:20px}
+.nav-notif{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:#EF3C54;border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:translateY(-50%) scale(1)}50%{opacity:.6;transform:translateY(-50%) scale(1.3)}}
+.sidebar-footer{margin-top:auto;padding:14px 10px;border-top:1px solid rgba(49,69,149,.2)}
+.profile-mini{display:flex;align-items:center;gap:10px;padding:9px;border-radius:11px;cursor:pointer;transition:background .2s}
+.profile-mini:hover{background:rgba(49,69,149,.18)}
+.profile-mini .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ec9731,#314595);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:.95rem;color:#fff;flex-shrink:0}
+.profile-mini .info{flex:1;min-width:0}
+.profile-mini .pname{font-family:var(--font-b);font-size:.88rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-mini .prole{font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.35)}
+.btn-sair{width:100%;background:rgba(239,60,84,.08);border:1px solid rgba(239,60,84,.2);color:#EF3C54;border-radius:10px;padding:8px;font-family:var(--font-b);font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:8px}
+.btn-sair:hover{background:rgba(239,60,84,.18)}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:28px 32px;background:#0d1220}
+.main::-webkit-scrollbar{width:4px}.main::-webkit-scrollbar-thumb{background:rgba(49,69,149,.4);border-radius:4px}
+
+/* ── PAGES ── */
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:14px;flex-wrap:wrap}
+.page-title{font-family:var(--font-d);font-size:2.4rem;letter-spacing:1px;text-transform:uppercase;line-height:1}
+.page-title small{display:block;font-family:var(--font-b);font-size:.88rem;font-weight:400;color:rgba(255,255,255,.5);margin-top:5px;text-transform:none;letter-spacing:.03em}
+
+/* ── SEARCH ── */
+.search-wrap{position:relative;flex:1;max-width:360px;min-width:180px}
+.search-wrap input{width:100%;background:rgba(25,32,53,.8);border:1px solid rgba(49,69,149,.3);border-radius:50px;padding:10px 18px 10px 42px;color:#fff;font-family:var(--font-b);font-size:.98rem;outline:none;transition:border-color .2s,box-shadow .2s}
+.search-wrap input:focus{border-color:#ec9731;box-shadow:0 0 0 3px rgba(236,151,49,.12)}
+.search-wrap input::placeholder{color:rgba(255,255,255,.28)}
+.search-wrap .s-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:.95rem;pointer-events:none}
+
+/* ── CAT TABS ── */
+.cat-tabs{display:flex;gap:7px;margin-bottom:24px;flex-wrap:wrap}
+.cat-tab{padding:6px 20px;border-radius:50px;border:1px solid rgba(49,69,149,.3);background:transparent;color:rgba(255,255,255,.5);font-family:var(--font-b);font-size:.92rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.cat-tab:hover{border-color:#ec9731;color:#fff}
+.cat-tab.active{background:#ec9731;color:#fff;border-color:#ec9731}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#192035 0%,#223050 40%,#314595 100%);border-radius:22px;padding:32px;margin-bottom:32px;position:relative;overflow:hidden;display:flex;align-items:center;gap:28px}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 75% 50%,rgba(236,151,49,.16) 0%,transparent 60%)}
+.hero-art{width:130px;height:130px;border-radius:18px;background:linear-gradient(135deg,#ec9731,#f5b554);display:flex;align-items:center;justify-content:center;font-size:3.2rem;flex-shrink:0;box-shadow:0 16px 50px rgba(236,151,49,.3);position:relative;z-index:1;overflow:hidden}
+.hero-art img{width:100%;height:100%;object-fit:cover}
+.hero-info{position:relative;z-index:1}
+.hero-tag{display:inline-block;background:rgba(236,151,49,.18);color:#ec9731;font-family:var(--font-b);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;padding:4px 13px;border-radius:20px;margin-bottom:9px}
+.hero-title{font-family:var(--font-d);font-size:2.6rem;letter-spacing:1.5px;text-transform:uppercase;line-height:1;margin-bottom:7px}
+.hero-sub{font-family:var(--font-b);color:rgba(255,255,255,.6);font-size:.98rem;margin-bottom:20px}
+.hero-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ── BUTTONS ── */
+.btn-primary{background:#ec9731;color:#fff;border:none;border-radius:50px;padding:10px 26px;font-family:var(--font-b);font-weight:700;font-size:.98rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(236,151,49,.38)}
+.btn-primary:active{transform:scale(.97)}
+.btn-ghost{background:transparent;color:rgba(255,255,255,.6);border:1px solid rgba(49,69,149,.35);border-radius:50px;padding:9px 20px;font-family:var(--font-b);font-size:.95rem;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px}
+.btn-ghost:hover{border-color:rgba(255,255,255,.5);color:#fff}
+
+/* ── SECTION HEADER ── */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-title{font-family:var(--font-d);font-size:1.2rem;letter-spacing:1px;text-transform:uppercase}
+.see-all{color:#ec9731;font-family:var(--font-b);font-size:.86rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:none;border:none;transition:opacity .2s}
+.see-all:hover{opacity:.7}
+
+/* ── CARD GRID ── */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;margin-bottom:32px}
+.card{background:rgba(25,32,53,.8);border-radius:16px;padding:14px;cursor:pointer;transition:all .25s;border:1px solid transparent;position:relative;overflow:hidden}
+.card:hover{background:rgba(34,48,80,.9);border-color:rgba(49,69,149,.3);transform:translateY(-3px)}
+.card:hover .play-ov{opacity:1}
+.card-art{width:100%;aspect-ratio:1;border-radius:11px;margin-bottom:11px;display:flex;align-items:center;justify-content:center;font-size:2.3rem;position:relative;overflow:hidden}
+.card-art img{width:100%;height:100%;object-fit:cover}
+.play-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:11px}
+.play-ov span{font-size:2rem}
+.card-name{font-family:var(--font-b);font-weight:600;font-size:.93rem;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-sub{font-family:var(--font-b);color:rgba(255,255,255,.35);font-size:.78rem}
+.card-type{display:inline-block;font-family:var(--font-b);font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:1.8px;padding:2px 8px;border-radius:4px;margin-bottom:5px}
+.type-album{background:rgba(49,69,149,.25);color:#8ea3e8}
+.type-ep{background:rgba(236,151,49,.18);color:#ec9731}
+.type-single{background:rgba(255,255,255,.1);color:#fff}
+.type-mixtape{background:rgba(34,52,136,.3);color:#a0b4ff}
+
+/* ── TRACK LIST ── */
+.track-list{background:rgba(25,32,53,.6);border-radius:16px;overflow:hidden;margin-bottom:32px;border:1px solid rgba(49,69,149,.2)}
+.track-list-header{display:grid;grid-template-columns:38px 1fr 130px 95px 75px 55px;padding:9px 18px;border-bottom:1px solid rgba(49,69,149,.2);color:rgba(255,255,255,.3);font-family:var(--font-b);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:2px}
+.track-row{display:grid;grid-template-columns:38px 1fr 130px 95px 75px 55px;padding:11px 18px;align-items:center;border-bottom:1px solid rgba(49,69,149,.15);cursor:pointer;transition:background .15s}
+.track-row:last-child{border-bottom:none}
+.track-row:hover{background:rgba(49,69,149,.12)}
+.track-row.playing{background:rgba(49,69,149,.18)}
+.track-num{color:rgba(255,255,255,.3);font-family:var(--font-b);font-size:.9rem;text-align:center}
+.track-row.playing .track-num{color:#ec9731}
+.track-info{display:flex;align-items:center;gap:11px;min-width:0}
+.track-thumb{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;overflow:hidden}
+.track-thumb img{width:100%;height:100%;object-fit:cover}
+.track-name{font-family:var(--font-b);font-weight:600;font-size:.93rem;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-artist{font-family:var(--font-b);color:rgba(255,255,255,.38);font-size:.8rem}
+.track-album{font-family:var(--font-b);color:rgba(255,255,255,.55);font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-duration{font-family:var(--font-b);color:rgba(255,255,255,.5);font-size:.88rem;text-align:right}
+.track-actions{display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.icon-btn{background:none;border:none;color:rgba(255,255,255,.35);font-size:.98rem;cursor:pointer;padding:4px;border-radius:6px;transition:color .15s;line-height:1}
+.icon-btn:hover{color:#fff}
+.icon-btn.liked{color:#ec9731}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:rgba(25,32,53,.8);border-radius:16px;padding:20px;border:1px solid rgba(49,69,149,.25)}
+.stat-icon{font-size:1.5rem;margin-bottom:8px}
+.stat-val{font-family:var(--font-d);font-size:2rem;letter-spacing:1px;margin-bottom:3px;line-height:1}
+.stat-label{font-family:var(--font-b);color:rgba(255,255,255,.35);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase}
+.stat-change{font-family:var(--font-b);font-size:.8rem;color:#4ade80;margin-top:5px}
+
+/* ── PLAYER ── */
+.player{height:var(--player-h);background:rgba(10,13,24,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(49,69,149,.25);display:flex;align-items:center;padding:0 26px;gap:22px;position:fixed;bottom:0;left:0;right:0;z-index:100}
+.player-track{display:flex;align-items:center;gap:13px;min-width:210px;flex:0 0 210px}
+.player-thumb{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;overflow:hidden}
+.player-thumb img{width:100%;height:100%;object-fit:cover}
+.player-name{font-family:var(--font-b);font-weight:600;font-size:.93rem;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.player-artist{font-family:var(--font-b);color:rgba(255,255,255,.38);font-size:.78rem}
+.player-like{background:none;border:none;color:rgba(255,255,255,.35);font-size:1.2rem;cursor:pointer;padding:4px;transition:color .15s,transform .15s}
+.player-like:hover,.player-like.liked{color:#ec9731;transform:scale(1.2)}
+.player-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px}
+.player-controls{display:flex;align-items:center;gap:15px}
+.ctrl-btn{background:none;border:none;color:rgba(255,255,255,.55);font-size:1.3rem;cursor:pointer;transition:color .15s,transform .1s;line-height:1}
+.ctrl-btn:hover{color:#fff;transform:scale(1.1)}
+.ctrl-btn.active{color:#ec9731}
+.play-btn{width:42px;height:42px;border-radius:50%;background:#ec9731;color:#fff;border:none;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.play-btn:hover{transform:scale(1.08);box-shadow:0 0 20px rgba(236,151,49,.45)}
+.progress-bar-wrap{width:100%;display:flex;align-items:center;gap:9px}
+.time-label{font-family:var(--font-b);color:rgba(255,255,255,.35);font-size:.76rem;min-width:34px;letter-spacing:.04em}
+.progress-bar{flex:1;height:4px;background:rgba(49,69,149,.5);border-radius:4px;cursor:pointer}
+.progress-fill{height:100%;background:#ec9731;border-radius:4px;width:0%;transition:width .5s linear}
+.player-right{display:flex;align-items:center;gap:11px;min-width:170px;justify-content:flex-end}
+.vol-wrap{display:flex;align-items:center;gap:7px}
+.vol-icon{color:rgba(255,255,255,.35);font-size:.95rem}
+.volume-bar{width:78px;height:4px;background:rgba(49,69,149,.5);border-radius:4px;cursor:pointer}
+.volume-fill{height:100%;background:rgba(255,255,255,.5);border-radius:4px;width:70%}
+.dl-btn{background:rgba(34,48,80,.8);border:1px solid rgba(49,69,149,.3);color:rgba(255,255,255,.6);border-radius:8px;padding:6px 13px;font-family:var(--font-b);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.dl-btn:hover{border-color:#ec9731;color:#ec9731}
+
+/* ── FAN PROFILE ── */
+.fan-profile-header{background:linear-gradient(135deg,#192035,#314595);border-radius:22px;padding:28px;margin-bottom:22px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden}
+.fan-profile-header::after{content:'';position:absolute;right:-50px;top:-50px;width:260px;height:260px;background:radial-gradient(circle,rgba(236,151,49,.1),transparent 60%);border-radius:50%}
+.fan-av{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#ec9731,#314595);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:2rem;flex-shrink:0;border:3px solid rgba(255,255,255,.15);position:relative;z-index:1;overflow:hidden}
+.fan-av img{width:100%;height:100%;object-fit:cover}
+.fan-info{position:relative;z-index:1}
+.fan-name{font-family:var(--font-d);font-size:1.85rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.fan-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(236,151,49,.18);color:#ec9731;border-radius:20px;padding:4px 13px;font-family:var(--font-b);font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.fan-stats{display:flex;gap:22px}
+.fan-stat-item{text-align:center}
+.fan-stat-num{font-family:var(--font-d);font-size:1.4rem;letter-spacing:1px}
+.fan-stat-lbl{font-family:var(--font-b);color:rgba(255,255,255,.35);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}
+.fan-tabs{display:flex;gap:0;background:rgba(25,32,53,.8);border-radius:11px;padding:4px;margin-bottom:22px;width:fit-content}
+.fan-tab{padding:8px 20px;border-radius:9px;border:none;background:transparent;color:rgba(255,255,255,.5);font-family:var(--font-b);font-size:.92rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.fan-tab.active{background:rgba(34,48,80,.9);color:#fff}
+.fan-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.fan-widget{background:rgba(25,32,53,.8);border-radius:16px;padding:18px;border:1px solid rgba(49,69,149,.22)}
+.fan-widget-title{font-family:var(--font-b);font-size:.68rem;font-weight:700;margin-bottom:14px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:2.5px}
+.activity-item{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid rgba(49,69,149,.18)}
+.activity-item:last-child{border-bottom:none;padding-bottom:0}
+.activity-dot{width:7px;height:7px;border-radius:50%;background:#ec9731;flex-shrink:0}
+.activity-text{font-family:var(--font-b);font-size:.88rem;color:rgba(255,255,255,.6);flex:1}
+.activity-time{font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.3)}
+
+/* ── ADMIN ── */
+.admin-tabs{display:flex;gap:4px;background:rgba(25,32,53,.8);border-radius:11px;padding:4px;margin-bottom:24px;overflow-x:auto}
+.admin-tab{padding:9px 18px;border-radius:9px;border:none;background:transparent;color:rgba(255,255,255,.5);font-family:var(--font-b);font-size:.88rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.admin-tab.active{background:rgba(49,69,149,.4);color:#fff}
+.admin-tab .tab-dot{width:6px;height:6px;border-radius:50%;background:#ec9731}
+.admin-music-table{background:rgba(25,32,53,.8);border-radius:16px;overflow:hidden;border:1px solid rgba(49,69,149,.22)}
+.admin-table-header{display:grid;grid-template-columns:40px 1fr 120px 100px 80px 70px 70px 120px;padding:11px 18px;background:rgba(34,48,80,.8);color:rgba(255,255,255,.35);font-family:var(--font-b);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;border-bottom:1px solid rgba(49,69,149,.2)}
+.admin-row{display:grid;grid-template-columns:40px 1fr 120px 100px 80px 70px 70px 120px;padding:12px 18px;align-items:center;border-bottom:1px solid rgba(49,69,149,.15);transition:background .15s;font-family:var(--font-b);font-size:.9rem}
+.admin-row:last-child{border-bottom:none}
+.admin-row:hover{background:rgba(49,69,149,.1)}
+.admin-row.disabled{opacity:.42}
+.status-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-family:var(--font-b);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.status-active{background:rgba(74,222,128,.14);color:#4ade80}
+.status-disabled{background:rgba(255,71,71,.14);color:#ff4747}
+.admin-actions{display:flex;gap:4px}
+.a-btn{background:none;border:1px solid rgba(49,69,149,.28);color:rgba(255,255,255,.4);border-radius:6px;padding:4px 8px;font-family:var(--font-b);font-size:.72rem;cursor:pointer;transition:all .15s}
+.a-btn:hover{background:rgba(49,69,149,.18);color:#fff}
+.a-btn.danger:hover{border-color:#ff4747;color:#ff4747}
+.a-btn.warn:hover{border-color:#ec9731;color:#ec9731}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-family:var(--font-b);font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.form-input,.form-select{background:rgba(34,48,80,.7);border:1px solid rgba(49,69,149,.3);border-radius:10px;padding:10px 13px;color:#fff;font-family:var(--font-b);font-size:.96rem;outline:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus{border-color:#ec9731}
+.form-select{appearance:none;cursor:pointer}
+.form-input::placeholder{color:rgba(255,255,255,.28)}
+.upload-zone{border:2px dashed rgba(49,69,149,.35);border-radius:11px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.upload-zone:hover{border-color:#ec9731;background:rgba(236,151,49,.03)}
+.upload-ico{font-size:1.9rem;margin-bottom:7px;opacity:.55}
+.upload-text{font-family:var(--font-b);color:rgba(255,255,255,.38);font-size:.88rem}
+.upload-text strong{color:#ec9731}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:100px;right:22px;background:rgba(34,48,80,.95);border:1px solid rgba(49,69,149,.3);border-radius:12px;padding:13px 18px;display:flex;align-items:center;gap:9px;font-family:var(--font-b);font-size:.93rem;font-weight:500;z-index:1000;transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;backdrop-filter:blur(12px)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:50px 20px;color:rgba(255,255,255,.28)}
+.empty-state .e-ico{font-size:2.8rem;margin-bottom:10px;opacity:.45}
+.empty-state p{font-family:var(--font-b);font-size:.95rem;letter-spacing:.02em}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:rgba(25,32,53,.98);border:1px solid rgba(49,69,149,.3);border-radius:20px;padding:30px;width:90%;max-width:500px;transform:scale(.96);transition:transform .2s}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-title{font-family:var(--font-d);font-size:1.3rem;letter-spacing:1px;text-transform:uppercase}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:1.3rem;cursor:pointer}
+
+/* ── AUTH OVERLAY ── */
+.auth-overlay{position:fixed;inset:0;background:rgba(13,18,32,.98);z-index:300;display:flex;align-items:center;justify-content:center}
+.auth-box{background:rgba(25,32,53,.95);border:1px solid rgba(49,69,149,.3);border-radius:24px;padding:40px 36px;width:90%;max-width:390px;text-align:center}
+.auth-logo{font-family:var(--font-d);font-size:1.6rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;line-height:1}
+.auth-logo span{color:#ec9731;display:block;font-size:2rem;letter-spacing:3px}
+.auth-sub{font-family:var(--font-b);color:rgba(255,255,255,.35);font-size:.88rem;letter-spacing:.04em;margin-bottom:26px}
+.auth-tabs{display:flex;background:rgba(34,48,80,.7);border-radius:10px;padding:4px;margin-bottom:22px}
+.auth-tab{flex:1;padding:8px;border-radius:8px;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:var(--font-b);font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.auth-tab.active{background:rgba(49,69,149,.5);color:#fff}
+.auth-form{display:flex;flex-direction:column;gap:11px}
+.auth-sep{font-family:var(--font-b);color:rgba(255,255,255,.28);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;margin:6px 0}
+.google-btn{background:#fff;color:#333;border:none;border-radius:10px;padding:11px;font-family:var(--font-b);font-size:.93rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px}
+.google-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.auth-error{background:rgba(239,60,84,.1);border:1px solid rgba(239,60,84,.28);color:#ff8899;border-radius:8px;padding:9px 13px;font-family:var(--font-b);font-size:.88rem;display:none}
+.auth-error.show{display:block}
+.firebase-loading{font-family:var(--font-b);color:rgba(255,255,255,.35);font-size:.86rem;margin-top:12px}
+
+/* ── CONTACTOS PAGE ── */
+.contact-card{background:rgba(25,32,53,.8);border:1px solid rgba(49,69,149,.22);border-radius:18px;padding:22px;transition:border-color .2s}
+.contact-card:hover{border-color:rgba(236,151,49,.3)}
+.contact-input{width:100%;background:rgba(34,48,80,.6);border:1px solid rgba(49,69,149,.3);border-radius:11px;padding:11px 13px;color:#fff;font-family:var(--font-b);font-size:.98rem;outline:none;transition:border-color .2s;margin-bottom:12px}
+.contact-input:focus{border-color:#ec9731}
+.contact-input::placeholder{color:rgba(255,255,255,.28)}
+textarea.contact-input{resize:vertical;min-height:110px}
+
+/* ── NOTIF BADGE ── */
+.nav-badge-red{position:absolute;right:10px;top:50%;transform:translateY(-50%);min-width:18px;height:18px;background:#EF3C54;border-radius:20px;font-family:var(--font-d);font-size:.6rem;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px}
+</style>
 </head>
 <body>
 
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyBFD5KZ8sGfvXU-evgdRZMRMDOxsr0d1uo",
-    authDomain: "sons-bwe-fixes-20ea5.firebaseapp.com",
-    projectId: "sons-bwe-fixes-20ea5",
-    storageBucket: "sons-bwe-fixes-20ea5.firebasestorage.app",
-    messagingSenderId: "866364254394",
-    appId: "1:866364254394:web:c124524c368f1504ceba83",
-    measurementId: "G-KP0ZC6JTP9"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-
-<!-- ─── AUTH OVERLAY ─── -->
+<!-- ═══ AUTH OVERLAY ═══ -->
 <div class="auth-overlay" id="auth-overlay">
   <div class="auth-box">
-    <div class="auth-logo">SONS BWE <span>FIXES</span></div>
+    <div class="auth-logo">SONS BWE<span>FIXES</span></div>
     <div class="auth-sub">Entra para aceder à tua música</div>
-
     <div class="auth-tabs">
-      <button class="auth-tab active" data-tab="login"    onclick="switchAuthTab('login')">Entrar</button>
-      <button class="auth-tab"        data-tab="register" onclick="switchAuthTab('register')">Registar</button>
+      <button class="auth-tab active" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-tab"        onclick="switchTab('register')">Registar</button>
     </div>
-
     <div class="auth-form">
-      <div id="auth-name-wrap" style="display:none">
-        <input class="form-input" id="auth-name" placeholder="Nome de utilizador">
+      <div id="wrap-name" style="display:none">
+        <input class="form-input" id="auth-name" placeholder="Teu nome / nickname">
       </div>
       <input class="form-input" id="auth-email" type="email"    placeholder="Email">
       <input class="form-input" id="auth-pass"  type="password" placeholder="Password">
-
       <div id="auth-error" class="auth-error"></div>
-
-      <button class="btn-primary" id="btn-auth-login"    onclick="authLogin()"    style="justify-content:center">Entrar →</button>
-      <button class="btn-primary" id="btn-auth-register" onclick="authRegister()" style="justify-content:center;display:none">Criar Conta →</button>
-
+      <button class="btn-primary" id="btn-login"    onclick="doAuth()" style="justify-content:center">Entrar →</button>
+      <button class="btn-primary" id="btn-register" onclick="doAuth()" style="justify-content:center;display:none">Criar Conta →</button>
       <div class="auth-sep">— ou —</div>
-
-      <button class="google-btn" onclick="authGoogle()">
+      <button class="google-btn" onclick="doGoogle()">
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.7 0 6.8 5.4 3 13.3l7.8 6C12.8 13.2 17.9 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-9.9 7.1-17z"/><path fill="#FBBC05" d="M10.8 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.7-4.7L2.4 13.3A24 24 0 0 0 0 24c0 3.8.9 7.4 2.4 10.7l8.4-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.3-7.7 2.3-6.1 0-11.2-3.7-13.2-9L2.4 36c3.8 7.9 11.7 12 21.6 12z"/></svg>
         Continuar com Google
       </button>
-
       <div id="auth-loading" class="firebase-loading"></div>
+    </div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(49,69,149,.2);text-align:center">
+      <a href="recuperar.html" style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;text-decoration:none"
+         onmouseover="this.style.color='#ec9731'" onmouseout="this.style.color='rgba(255,255,255,.3)'">
+        Esqueci a password
+      </a>
     </div>
   </div>
 </div>
 
-<!-- ─── APP SHELL ─── -->
+<!-- ═══ APP SHELL ═══ -->
 <div class="app-shell">
 
-  <!-- SIDEBAR -->
+  <!-- ── SIDEBAR ── -->
   <aside class="sidebar">
-    <div class="logo">SONS BWE<br><span>FIXES</span></div>
+    <div class="logo">SONS BWE<span>FIXES</span></div>
 
     <div class="nav-section">
       <div class="nav-label">Menu</div>
       <div class="nav-item active" onclick="nav('home')">    <span class="ico">🏠</span> Início</div>
       <div class="nav-item"        onclick="nav('search')">  <span class="ico">🔍</span> Descobrir</div>
-      <div class="nav-item"        onclick="nav('library')"> <span class="ico">🎵</span> Biblioteca <span class="badge">0</span></div>
+      <div class="nav-item"        onclick="nav('library')"> <span class="ico">🎵</span> Biblioteca <span class="badge" id="badge-count">0</span></div>
+      <div class="nav-item"        onclick="nav('contacto')"><span class="ico">✉️</span> Contacto / Parcerias</div>
     </div>
 
     <div class="nav-section">
       <div class="nav-label">Categorias</div>
-      <div class="nav-item" onclick="nav('albums')">   <span class="ico">💿</span> Álbuns</div>
-      <div class="nav-item" onclick="nav('eps')">      <span class="ico">🎛️</span> EPs</div>
-      <div class="nav-item" onclick="nav('singles')">  <span class="ico">🎤</span> Singles</div>
-      <div class="nav-item" onclick="nav('mixtapes')"> <span class="ico">📼</span> Mixtapes</div>
+      <div class="nav-item" onclick="nav('albums')">  <span class="ico">💿</span> Álbuns</div>
+      <div class="nav-item" onclick="nav('eps')">     <span class="ico">🎛️</span> EPs</div>
+      <div class="nav-item" onclick="nav('singles')"> <span class="ico">🎤</span> Singles</div>
+      <div class="nav-item" onclick="nav('mixtapes')"><span class="ico">📼</span> Mixtapes</div>
     </div>
 
     <div class="nav-section">
       <div class="nav-label">Conta</div>
-      <div class="nav-item"               onclick="nav('fan')">  <span class="ico">👤</span> Perfil de Fã</div>
-      <div class="nav-item admin-only"    onclick="nav('admin')" style="display:none"><span class="ico">⚙️</span> Administrador</div>
+      <div class="nav-item"            onclick="nav('fan')">   <span class="ico">👤</span> O Meu Perfil</div>
+      <div class="nav-item admin-only" onclick="nav('admin')" id="nav-admin" style="display:none;position:relative">
+        <span class="ico">⚙️</span> Administrador
+        <span class="nav-badge-red" id="admin-notif-badge" style="display:none">!</span>
+      </div>
     </div>
 
     <div class="sidebar-footer">
       <div class="profile-mini" onclick="nav('fan')">
-        <div class="av user-initial">?</div>
+        <div class="av user-initial" id="sb-av">?</div>
         <div class="info">
-          <div class="name user-name-display">A carregar...</div>
-          <div class="role">Fã ⭐</div>
+          <div class="pname user-name-display" id="sb-name">A carregar...</div>
+          <div class="prole" id="sb-role">Fã ⭐</div>
         </div>
       </div>
-      <div style="margin-top:8px;padding:0 10px">
-        <button class="btn-ghost" style="width:100%;justify-content:center;font-size:.8rem;padding:8px" onclick="authLogout()">🚪 Terminar Sessão</button>
-      </div>
+      <button class="btn-sair" onclick="doLogout()">🚪 Terminar Sessão</button>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- ── MAIN ── -->
   <main class="main">
 
     <!-- ══ HOME ══ -->
     <div class="page active" id="page-home">
       <div class="page-header">
-        <div class="page-title">Boa tarde 👋<small>O que vamos ouvir hoje?</small></div>
+        <div class="page-title" id="greeting">Olá 👋<small>O que vamos ouvir hoje?</small></div>
         <div class="search-wrap">
           <span class="s-ico">🔍</span>
-          <input type="text" placeholder="Pesquisar músicas, artistas..." oninput="filterTracks(this.value)">
+          <input type="text" placeholder="Pesquisar músicas, artistas..." oninput="filterTracks(this.value,'home')">
         </div>
       </div>
 
-      <div class="hero">
-        <div class="hero-art">🔥</div>
+      <div class="hero" id="hero-section">
+        <div class="hero-art" id="hero-art">🔥</div>
         <div class="hero-info">
           <div class="hero-tag">🎯 Em Destaque</div>
-          <div class="hero-title">Sons Bwe Fixes</div>
-          <div class="hero-sub">Os melhores sons directos para si</div>
+          <div class="hero-title" id="hero-title">Sons Bwe Fixes</div>
+          <div class="hero-sub"   id="hero-sub">Os melhores sons directos para si</div>
           <div class="hero-actions">
             <button class="btn-primary" onclick="playTrack(0)">▶ Reproduzir</button>
-            <button class="btn-ghost"   onclick="showToast('💾 Adicionado à biblioteca!')">+ Biblioteca</button>
-            <button class="btn-ghost"   onclick="downloadTrack()">⬇ Download</button>
+            <button class="btn-ghost"   onclick="addToFavorites()">❤️ Favorito</button>
+            <button class="btn-ghost"   onclick="handleDownloadCurrent()">⬇ Download</button>
           </div>
         </div>
       </div>
 
       <div class="sec-header">
         <div class="sec-title">Em Destaque</div>
-        <button class="see-all" onclick="nav('albums')">Ver todos →</button>
+        <button class="see-all" onclick="nav('library')">Ver todos →</button>
       </div>
       <div class="card-grid" id="card-grid-home">
         <div class="empty-state" style="grid-column:1/-1"><div class="e-ico">⏳</div><p>A carregar...</p></div>
@@ -151,12 +392,8 @@
         <button class="see-all" onclick="nav('library')">Ver todas →</button>
       </div>
       <div class="track-list">
-        <div class="track-list-header">
-          <div>#</div><div>TÍTULO</div><div>ÁLBUM</div><div>CATEGORIA</div><div>DURAÇÃO</div><div>AÇÕES</div>
-        </div>
-        <div id="track-list-home">
-          <div class="empty-state"><div class="e-ico">⏳</div><p>A carregar músicas...</p></div>
-        </div>
+        <div class="track-list-header"><div>#</div><div>TÍTULO</div><div>ÁLBUM</div><div>CATEGORIA</div><div>DURAÇÃO</div><div>AÇÕES</div></div>
+        <div id="track-list-home"><div class="empty-state"><div class="e-ico">⏳</div><p>A carregar músicas...</p></div></div>
       </div>
     </div>
 
@@ -177,60 +414,39 @@
         <button class="cat-tab" onclick="filterCat('mixtape',this)">Mixtapes</button>
       </div>
       <div class="track-list">
-        <div class="track-list-header">
-          <div>#</div><div>TÍTULO</div><div>ÁLBUM</div><div>CATEGORIA</div><div>DURAÇÃO</div><div>AÇÕES</div>
-        </div>
+        <div class="track-list-header"><div>#</div><div>TÍTULO</div><div>ÁLBUM</div><div>CATEGORIA</div><div>DURAÇÃO</div><div>AÇÕES</div></div>
         <div id="track-list-lib"></div>
       </div>
     </div>
 
-    <!-- ══ ÁLBUNS ══ -->
-    <div class="page" id="page-albums">
-      <div class="page-header"><div class="page-title">Álbuns<small>Colecção completa</small></div></div>
-      <div class="card-grid" id="grid-albums"></div>
-    </div>
-
-    <!-- ══ EPS ══ -->
-    <div class="page" id="page-eps">
-      <div class="page-header"><div class="page-title">EPs<small>Extended Plays</small></div></div>
-      <div class="card-grid" id="grid-eps"></div>
-    </div>
-
-    <!-- ══ SINGLES ══ -->
-    <div class="page" id="page-singles">
-      <div class="page-header"><div class="page-title">Singles<small>Lançamentos individuais</small></div></div>
-      <div class="card-grid" id="grid-singles"></div>
-    </div>
-
-    <!-- ══ MIXTAPES ══ -->
-    <div class="page" id="page-mixtapes">
-      <div class="page-header"><div class="page-title">Mixtapes<small>Colectâneas exclusivas</small></div></div>
-      <div class="card-grid" id="grid-mixtapes"></div>
-    </div>
+    <!-- ══ CATEGORIAS ══ -->
+    <div class="page" id="page-albums">  <div class="page-header"><div class="page-title">Álbuns<small>Colecção completa</small></div></div><div class="card-grid" id="grid-albums"></div></div>
+    <div class="page" id="page-eps">     <div class="page-header"><div class="page-title">EPs<small>Extended Plays</small></div></div>   <div class="card-grid" id="grid-eps"></div></div>
+    <div class="page" id="page-singles"> <div class="page-header"><div class="page-title">Singles<small>Lançamentos individuais</small></div></div><div class="card-grid" id="grid-singles"></div></div>
+    <div class="page" id="page-mixtapes"><div class="page-header"><div class="page-title">Mixtapes<small>Colectâneas exclusivas</small></div></div><div class="card-grid" id="grid-mixtapes"></div></div>
 
     <!-- ══ PERFIL FÃ ══ -->
     <div class="page" id="page-fan">
       <div class="fan-profile-header">
-        <div class="fan-av user-initial" style="font-size:2rem">?</div>
+        <div class="fan-av" id="fan-av"><span id="fan-av-initial">?</span></div>
         <div class="fan-info">
           <div class="fan-name user-name-display">Utilizador</div>
-          <div class="fan-badge">⭐ Fã</div>
+          <div class="fan-badge" id="fan-badge-role">⭐ Fã</div>
           <div class="fan-stats">
-            <div class="fan-stat-item"><div class="fan-stat-num fan-likes-count">0</div><div class="fan-stat-lbl">Likes</div></div>
-            <div class="fan-stat-item"><div class="fan-stat-num">—</div><div class="fan-stat-lbl">Playlists</div></div>
-            <div class="fan-stat-item"><div class="fan-stat-num">—</div><div class="fan-stat-lbl">Downloads</div></div>
+            <div class="fan-stat-item"><div class="fan-stat-num" id="fan-s-likes">0</div><div class="fan-stat-lbl">Likes</div></div>
+            <div class="fan-stat-item"><div class="fan-stat-num" id="fan-s-plays">0</div><div class="fan-stat-lbl">Plays</div></div>
+            <div class="fan-stat-item"><div class="fan-stat-num" id="fan-s-dl">0</div><div class="fan-stat-lbl">Downloads</div></div>
           </div>
         </div>
-        <div style="margin-left:auto;display:flex;gap:10px;align-items:flex-start">
-          <button class="btn-ghost" onclick="showToast('✏️ Em breve!')">✏️ Editar</button>
-          <button class="btn-ghost" onclick="showToast('📤 Link copiado!')">🔗 Partilhar</button>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:flex-start;position:relative;z-index:1">
+          <button class="btn-ghost" onclick="openEditProfileModal()">✏️ Editar</button>
+          <button class="btn-ghost" onclick="doLogout()">🚪 Sair</button>
         </div>
       </div>
 
       <div class="fan-tabs">
         <button class="fan-tab active" onclick="fanTab('activity',this)">Actividade</button>
         <button class="fan-tab"        onclick="fanTab('favorites',this)">Favoritos</button>
-        <button class="fan-tab"        onclick="fanTab('playlists',this)">Playlists</button>
         <button class="fan-tab"        onclick="fanTab('downloads',this)">Downloads</button>
       </div>
 
@@ -238,7 +454,7 @@
         <div class="fan-grid">
           <div class="fan-widget">
             <div class="fan-widget-title">🕐 Actividade Recente</div>
-            <div class="activity-item"><div class="activity-dot"></div><div class="activity-text">Bem-vindo ao Sons Bwe Fixes!</div><div class="activity-time">agora</div></div>
+            <div id="fan-recent-activity"><div class="activity-item"><div class="activity-dot"></div><div class="activity-text">Bem-vindo ao Sons Bwe Fixes!</div><div class="activity-time">agora</div></div></div>
           </div>
           <div class="fan-widget">
             <div class="fan-widget-title">📊 Top Músicas</div>
@@ -247,115 +463,94 @@
         </div>
       </div>
       <div id="fan-favorites" style="display:none">
-        <div class="fan-widget"><div class="fan-widget-title">❤️ Músicas Favoritas</div><div id="fan-fav-list"></div></div>
-      </div>
-      <div id="fan-playlists" style="display:none">
-        <div class="fan-widget"><div class="fan-widget-title">🎵 As Minhas Playlists</div><p style="color:var(--text3);font-size:.85rem">Funcionalidade de playlists em breve!</p></div>
+        <div class="fan-widget"><div class="fan-widget-title">❤️ Músicas Favoritas</div><div id="fan-fav-list"><div class="empty-state"><div class="e-ico">❤️</div><p>Ainda sem favoritos</p></div></div></div>
       </div>
       <div id="fan-downloads" style="display:none">
-        <div class="fan-widget"><div class="fan-widget-title">⬇️ Downloads</div><p style="color:var(--text3);font-size:.85rem">Histórico de downloads em breve!</p></div>
+        <div class="fan-widget"><div class="fan-widget-title">⬇️ Histórico de Downloads</div><div id="fan-dl-list"><div class="empty-state"><div class="e-ico">⬇️</div><p>Sem downloads ainda</p></div></div></div>
       </div>
     </div>
 
     <!-- ══ ADMIN ══ -->
     <div class="page" id="page-admin">
-      <div class="page-header">
-        <div class="page-title">Administrador<small>Gestão da plataforma</small></div>
-      </div>
+      <div class="page-header"><div class="page-title">Administrador<small>Gestão da plataforma</small></div></div>
 
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-icon">🎵</div><div class="stat-val" id="stat-tracks">—</div><div class="stat-label">Músicas</div></div>
-        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val" id="stat-listeners">—</div><div class="stat-label">Ouvintes</div></div>
-        <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-val" id="stat-likes">—</div><div class="stat-label">Likes</div></div>
-        <div class="stat-card"><div class="stat-icon">⬇️</div><div class="stat-val" id="stat-downloads">—</div><div class="stat-label">Downloads</div></div>
-        <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-val" id="stat-users">—</div><div class="stat-label">Utilizadores</div></div>
+        <div class="stat-card"><div class="stat-icon">🎵</div><div class="stat-val" id="st-musicas">—</div><div class="stat-label">Músicas</div><div class="stat-change" id="st-musicas-ch"></div></div>
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val" id="st-users">—</div><div class="stat-label">Utilizadores</div></div>
+        <div class="stat-card"><div class="stat-icon">▶️</div><div class="stat-val" id="st-plays">—</div><div class="stat-label">Plays Totais</div></div>
+        <div class="stat-card"><div class="stat-icon">⬇️</div><div class="stat-val" id="st-downloads">—</div><div class="stat-label">Downloads</div></div>
+        <div class="stat-card"><div class="stat-icon">✉️</div><div class="stat-val" id="st-msgs">—</div><div class="stat-label">Mensagens</div></div>
       </div>
 
       <div class="admin-tabs">
-        <button class="admin-tab active" onclick="adminTab('music',this)"><span class="tab-dot"></span>Gestão de Música</button>
-        <button class="admin-tab"        onclick="adminTab('add',this)">➕ Adicionar Música</button>
+        <button class="admin-tab active" onclick="adminTab('music',this)"><span class="tab-dot"></span>Músicas</button>
+        <button class="admin-tab"        onclick="adminTab('add',this)">➕ Adicionar</button>
+        <button class="admin-tab"        onclick="adminTab('users',this)">👥 Utilizadores</button>
+        <button class="admin-tab"        onclick="adminTab('msgs',this)">✉️ Mensagens <span id="msgs-badge" class="tab-dot" style="background:#EF3C54;display:none"></span></button>
         <button class="admin-tab"        onclick="adminTab('analytics',this)">📊 Analytics</button>
       </div>
 
       <!-- GESTÃO MÚSICA -->
       <div id="admin-music">
-        <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
-          <div class="search-wrap" style="max-width:280px">
-            <span class="s-ico">🔍</span>
-            <input type="text" placeholder="Pesquisar..." oninput="filterAdmin(this.value)">
-          </div>
-          <select class="form-select" style="width:140px" onchange="filterAdminCat(this.value)">
-            <option value="">Todas</option>
-            <option value="album">Álbum</option>
-            <option value="ep">EP</option>
-            <option value="single">Single</option>
-            <option value="mixtape">Mixtape</option>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+          <div class="search-wrap" style="max-width:260px"><span class="s-ico">🔍</span><input type="text" placeholder="Pesquisar..." oninput="filterAdmin(this.value)"></div>
+          <select class="form-select" style="width:130px" onchange="filterAdminCat(this.value)">
+            <option value="">Todas</option><option value="album">Álbum</option><option value="ep">EP</option><option value="single">Single</option><option value="mixtape">Mixtape</option>
           </select>
-          <button class="btn-primary" onclick="adminTab('add',document.querySelectorAll('.admin-tab')[1])">➕ Nova Música</button>
         </div>
         <div class="admin-music-table">
-          <div class="admin-table-header">
-            <div>#</div><div>TÍTULO / ARTISTA</div><div>CATEGORIA</div><div>DURAÇÃO</div><div>OUVINTES</div><div>LIKES</div><div>STATUS</div><div>ACÇÕES</div>
-          </div>
-          <div id="admin-track-list">
-            <div class="empty-state"><div class="e-ico">⏳</div><p>A carregar músicas...</p></div>
-          </div>
+          <div class="admin-table-header"><div>#</div><div>TÍTULO / ARTISTA</div><div>CATEGORIA</div><div>DURAÇÃO</div><div>PLAYS</div><div>LIKES</div><div>STATUS</div><div>ACÇÕES</div></div>
+          <div id="admin-track-list"><div class="empty-state"><div class="e-ico">⏳</div><p>A carregar...</p></div></div>
         </div>
       </div>
 
       <!-- ADICIONAR MÚSICA -->
       <div id="admin-add" style="display:none">
-        <div class="fan-widget" style="max-width:680px">
-          <div class="fan-widget-title" style="font-size:.9rem;margin-bottom:20px">➕ Registar Nova Música</div>
+        <div class="fan-widget" style="max-width:660px">
+          <div class="fan-widget-title" style="font-size:.88rem;margin-bottom:18px">➕ Registar Nova Música</div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="add-title" placeholder="Ex: Nação das Almas"></div>
             <div class="form-group"><label class="form-label">Artista *</label><input class="form-input" id="add-artist" placeholder="Ex: Burna Boy"></div>
             <div class="form-group"><label class="form-label">Álbum / EP</label><input class="form-input" id="add-album" placeholder="Ex: Love Damini"></div>
             <div class="form-group">
               <label class="form-label">Categoria *</label>
-              <select class="form-select" id="add-cat">
-                <option value="album">Album</option>
-                <option value="ep">EP</option>
-                <option value="single">Single</option>
-                <option value="mixtape">Mixtape</option>
-              </select>
+              <select class="form-select" id="add-cat"><option value="single">Single</option><option value="album">Album</option><option value="ep">EP</option><option value="mixtape">Mixtape</option></select>
             </div>
+            <div class="form-group"><label class="form-label">Duração</label><input class="form-input" id="add-dur" placeholder="Ex: 3:45"></div>
             <div class="form-group"><label class="form-label">Género</label><input class="form-input" id="add-genre" placeholder="Ex: Afrobeat"></div>
-            <div class="form-group"><label class="form-label">Ano</label><input class="form-input" id="add-year" type="number" placeholder="2024"></div>
             <div class="form-group full">
-              <label class="form-label">Ficheiro de Áudio *</label>
-              <div class="upload-zone" onclick="document.getElementById('add-audio').click()">
-                <div class="upload-ico">🎵</div>
-                <div class="upload-text">Clique ou arraste o ficheiro<br><span style="font-size:.75rem">MP3, WAV, FLAC — máx. 50MB</span></div>
-                <input type="file" id="add-audio" accept="audio/*" style="display:none" onchange="showToast('✅ Áudio: '+this.files[0]?.name)">
-              </div>
+              <label class="form-label">Link do Áudio (MP3 directo) *</label>
+              <input class="form-input" id="add-url" placeholder="https://... (link directo do ficheiro MP3)">
             </div>
             <div class="form-group full">
-              <label class="form-label">Capa (opcional)</label>
-              <div class="upload-zone" onclick="document.getElementById('add-cover').click()">
-                <div class="upload-ico">🖼️</div>
-                <div class="upload-text">Clique ou arraste a imagem<br><span style="font-size:.75rem">JPG, PNG, WebP — máx. 5MB</span></div>
-                <input type="file" id="add-cover" accept="image/*" style="display:none" onchange="showToast('✅ Capa: '+this.files[0]?.name)">
-              </div>
+              <label class="form-label">URL da Capa (opcional)</label>
+              <input class="form-input" id="add-cover-url" placeholder="https://... (link da imagem da capa)">
             </div>
           </div>
-          <div style="display:flex;gap:12px">
-            <button class="btn-primary" onclick="adminAddTrack()">✅ Registar Música</button>
+          <div style="display:flex;gap:11px">
+            <button class="btn-primary" onclick="adminAddTrack()">✅ Publicar Música</button>
             <button class="btn-ghost" onclick="adminTab('music',document.querySelector('.admin-tab'))">Cancelar</button>
           </div>
         </div>
       </div>
 
+      <!-- UTILIZADORES -->
+      <div id="admin-users" style="display:none">
+        <div class="admin-music-table">
+          <div class="admin-table-header" style="grid-template-columns:1fr 120px 100px 110px"><div>UTILIZADOR</div><div>STATUS</div><div>ROLE</div><div style="text-align:right">ACÇÕES</div></div>
+          <div id="admin-users-list"><div class="empty-state"><div class="e-ico">⏳</div><p>A carregar...</p></div></div>
+        </div>
+      </div>
+
+      <!-- MENSAGENS -->
+      <div id="admin-msgs" style="display:none">
+        <div id="admin-msgs-list" class="fan-grid"></div>
+      </div>
+
       <!-- ANALYTICS -->
       <div id="admin-analytics" style="display:none">
-        <div class="stats-row">
-          <div class="stat-card" style="grid-column:span 3">
-            <div class="fan-widget-title">📈 Músicas Mais Populares</div>
-            <div id="analytics-top">
-              <div class="empty-state"><div class="e-ico">⏳</div><p>A carregar analytics...</p></div>
-            </div>
-          </div>
-        </div>
+        <div class="sec-header"><div class="sec-title">🔥 Top Músicas por Plays</div></div>
+        <div id="analytics-top"><div class="empty-state"><div class="e-ico">⏳</div><p>A carregar analytics...</p></div></div>
       </div>
     </div>
 
@@ -365,7 +560,7 @@
         <div class="page-title">Descobrir<small>Explore toda a música</small></div>
         <div class="search-wrap">
           <span class="s-ico">🔍</span>
-          <input type="text" placeholder="Pesquisar..." oninput="filterTracks(this.value,'search')" autofocus>
+          <input type="text" placeholder="Pesquisar..." oninput="filterTracks(this.value,'search')" id="search-input">
         </div>
       </div>
       <div class="track-list">
@@ -374,18 +569,72 @@
       </div>
     </div>
 
+    <!-- ══ CONTACTO / PARCERIAS ══ -->
+    <div class="page" id="page-contacto">
+      <div class="page-header"><div class="page-title">Contacto<small>Parcerias e sugestões</small></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:860px">
+
+        <div class="contact-card">
+          <div class="fan-widget-title" style="font-size:.88rem;margin-bottom:16px">📨 Enviar Mensagem</div>
+          <input class="contact-input" id="c-nome"     type="text"  placeholder="Teu nome / artista">
+          <input class="contact-input" id="c-email"    type="email" placeholder="Teu email">
+          <select class="contact-input" id="c-assunto" style="appearance:none;cursor:pointer;background:rgba(34,48,80,.6)">
+            <option value="Parceria">Parceria Musical</option>
+            <option value="Sugestão">Sugestão de Música</option>
+            <option value="Patrocínio">Patrocínio</option>
+            <option value="Outro">Outro Assunto</option>
+          </select>
+          <textarea class="contact-input" id="c-msg" placeholder="Descreve a tua proposta ou mensagem..."></textarea>
+          <button class="btn-primary" onclick="enviarContacto()" id="btn-contacto" style="width:100%;justify-content:center">
+            📤 Enviar Proposta
+          </button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="contact-card">
+            <div class="fan-widget-title" style="font-size:.82rem;margin-bottom:12px">📍 Sobre Nós</div>
+            <p style="font-family:'Barlow Condensed',sans-serif;font-size:.95rem;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:14px">
+              Sons Bwe Fixes é uma plataforma de streaming dedicada à música africana. Aberta a parcerias, promoções e colaborações.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:rgba(255,255,255,.5)">
+                <i class="fa-solid fa-location-dot" style="color:#ec9731;width:18px"></i> Luanda, Angola
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:rgba(255,255,255,.5)">
+                <i class="fa-solid fa-envelope" style="color:#ec9731;width:18px"></i> contacto@sonsbwefixes.ao
+              </div>
+            </div>
+          </div>
+          <div class="contact-card">
+            <div class="fan-widget-title" style="font-size:.82rem;margin-bottom:12px">🌐 Redes Sociais</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <a href="#" style="display:flex;align-items:center;gap:8px;background:rgba(49,69,149,.25);border:1px solid rgba(49,69,149,.3);border-radius:10px;padding:8px 14px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.7);transition:all .2s" onmouseover="this.style.borderColor='#ec9731';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(49,69,149,.3)';this.style.color='rgba(255,255,255,.7)'">
+                <i class="fa-brands fa-instagram" style="color:#ec9731"></i> Instagram
+              </a>
+              <a href="#" style="display:flex;align-items:center;gap:8px;background:rgba(49,69,149,.25);border:1px solid rgba(49,69,149,.3);border-radius:10px;padding:8px 14px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.7);transition:all .2s" onmouseover="this.style.borderColor='#ec9731';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(49,69,149,.3)';this.style.color='rgba(255,255,255,.7)'">
+                <i class="fa-brands fa-youtube" style="color:#EF3C54"></i> YouTube
+              </a>
+              <a href="#" style="display:flex;align-items:center;gap:8px;background:rgba(49,69,149,.25);border:1px solid rgba(49,69,149,.3);border-radius:10px;padding:8px 14px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.7);transition:all .2s" onmouseover="this.style.borderColor='#ec9731';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(49,69,149,.3)';this.style.color='rgba(255,255,255,.7)'">
+                <i class="fa-brands fa-tiktok" style="color:#fff"></i> TikTok
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
-<!-- ─── PLAYER ─── -->
+<!-- ═══ PLAYER ═══ -->
 <div class="player">
   <div class="player-track">
     <div class="player-thumb" id="player-thumb" style="background:linear-gradient(135deg,#ec9731,#314595)">🎵</div>
-    <div>
+    <div style="min-width:0">
       <div class="player-name"   id="player-name">Sons Bwe Fixes</div>
       <div class="player-artist" id="player-artist">Seleccione uma música</div>
     </div>
-    <button class="player-like" id="player-like-btn" onclick="toggleLikePlayer()">♡</button>
+    <button class="player-like" id="player-like-btn" onclick="togglePlayerLike()">♡</button>
   </div>
 
   <div class="player-center">
@@ -398,9 +647,7 @@
     </div>
     <div class="progress-bar-wrap">
       <span class="time-label" id="time-curr">0:00</span>
-      <div class="progress-bar" onclick="seekTo(event,this)">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
+      <div class="progress-bar" onclick="seekTo(event,this)"><div class="progress-fill" id="progress-fill"></div></div>
       <span class="time-label" id="time-total">0:00</span>
     </div>
   </div>
@@ -410,43 +657,907 @@
       <span class="vol-icon">🔊</span>
       <div class="volume-bar" onclick="setVolume(event,this)"><div class="volume-fill" id="vol-fill"></div></div>
     </div>
-    <button class="dl-btn" onclick="downloadTrack()">⬇ Download</button>
+    <button class="dl-btn" onclick="handleDownloadCurrent()">⬇ Download</button>
   </div>
 </div>
 
-<!-- ─── TOAST ─── -->
-<div class="toast" id="toast">
-  <span class="toast-icon" id="toast-icon"></span>
-  <span id="toast-msg"></span>
-</div>
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"><span id="toast-msg"></span></div>
 
-<!-- ─── MODAL EDITAR ─── -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+<!-- ═══ MODAL EDITAR MÚSICA ═══ -->
+<div class="modal-overlay" id="modal-edit-track" onclick="closeModal('modal-edit-track',event)">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">✏️ Editar Música</div>
-      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+      <button class="modal-close" onclick="document.getElementById('modal-edit-track').classList.remove('open')">✕</button>
     </div>
     <div class="form-grid">
-      <div class="form-group"><label class="form-label">Título</label>  <input class="form-input" id="edit-title"></div>
-      <div class="form-group"><label class="form-label">Artista</label> <input class="form-input" id="edit-artist"></div>
-      <div class="form-group"><label class="form-label">Álbum</label>   <input class="form-input" id="edit-album"></div>
+      <div class="form-group"><label class="form-label">Título</label>  <input class="form-input" id="et-title"></div>
+      <div class="form-group"><label class="form-label">Artista</label> <input class="form-input" id="et-artist"></div>
+      <div class="form-group"><label class="form-label">Álbum</label>   <input class="form-input" id="et-album"></div>
       <div class="form-group">
         <label class="form-label">Categoria</label>
-        <select class="form-select" id="edit-cat">
-          <option>Album</option><option>Ep</option><option>Single</option><option>Mixtape</option>
-        </select>
+        <select class="form-select" id="et-cat"><option value="single">Single</option><option value="album">Album</option><option value="ep">EP</option><option value="mixtape">Mixtape</option></select>
       </div>
+      <div class="form-group"><label class="form-label">Duração</label><input class="form-input" id="et-dur" placeholder="3:45"></div>
+      <div class="form-group full"><label class="form-label">URL Áudio</label><input class="form-input" id="et-url"></div>
+      <div class="form-group full"><label class="form-label">URL Capa</label><input class="form-input" id="et-cover"></div>
     </div>
-    <div style="display:flex;gap:12px;margin-top:8px">
-      <button class="btn-primary" onclick="saveEdit()">💾 Guardar</button>
-      <button class="btn-ghost" onclick="document.getElementById('modal-overlay').classList.remove('open')">Cancelar</button>
+    <div style="display:flex;gap:11px;margin-top:8px">
+      <button class="btn-primary" onclick="saveEditTrack()">💾 Guardar</button>
+      <button class="btn-ghost" onclick="document.getElementById('modal-edit-track').classList.remove('open')">Cancelar</button>
     </div>
   </div>
 </div>
 
-<!-- ─── FIREBASE + APP ─── -->
-<script type="module" src="app.js"></script>
+<!-- ═══ MODAL EDITAR PERFIL ═══ -->
+<div class="modal-overlay" id="modal-edit-profile" onclick="closeModal('modal-edit-profile',event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar Perfil</div>
+      <button class="modal-close" onclick="document.getElementById('modal-edit-profile').classList.remove('open')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full"><label class="form-label">Nome de Exibição</label><input class="form-input" id="ep-nome" placeholder="Teu nome"></div>
+      <div class="form-group full"><label class="form-label">Localização</label><input class="form-input" id="ep-local" placeholder="Ex: Luanda, AO"></div>
+      <div class="form-group full"><label class="form-label">Gostos Musicais</label><input class="form-input" id="ep-gostos" placeholder="Ex: Kizomba, Afrobeat..."></div>
+    </div>
+    <div style="display:flex;gap:11px;margin-top:8px">
+      <button class="btn-primary" onclick="saveProfile()">💾 Guardar</button>
+      <button class="btn-ghost" onclick="document.getElementById('modal-edit-profile').classList.remove('open')">Cancelar</button>
+    </div>
+  </div>
+</div>
 
+<!-- ═══ FIREBASE + LÓGICA ═══ -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+// ══════════════════════════════════════════
+//  ESTADO GLOBAL
+// ══════════════════════════════════════════
+let allTracks   = [];
+let currentUser = null;
+let userProfile = null;
+let currentIdx  = 0;
+let isPlaying   = false;
+let isShuffle   = false;
+let isRepeat    = false;
+let editingTrackId = null;
+let progressInterval = null;
+let audioEl     = null;
+let unsubTracks = null;
+let currentCatFilter = 'all';
+
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+let authMode = 'login';
+
+function switchTab(modo) {
+  authMode = modo;
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (modo==='login' && i===0)||(modo==='register' && i===1));
+  });
+  document.getElementById('wrap-name').style.display = modo==='register' ? '' : 'none';
+  document.getElementById('btn-login').style.display    = modo==='login'    ? '' : 'none';
+  document.getElementById('btn-register').style.display = modo==='register' ? '' : 'none';
+  document.getElementById('auth-error').classList.remove('show');
+}
+
+async function doAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const nome  = document.getElementById('auth-name').value.trim();
+  const errEl = document.getElementById('auth-error');
+
+  if (!email || !pass) { errEl.textContent='Preenche email e password.'; errEl.classList.add('show'); return; }
+  if (authMode==='register' && !nome) { errEl.textContent='Introduz o teu nome.'; errEl.classList.add('show'); return; }
+
+  const btn = authMode==='login' ? document.getElementById('btn-login') : document.getElementById('btn-register');
+  btn.textContent = 'A PROCESSAR...'; btn.disabled = true; errEl.classList.remove('show');
+  document.getElementById('auth-loading').textContent = 'A verificar credenciais...';
+
+  try {
+    if (authMode==='login') {
+      const cred = await auth.signInWithEmailAndPassword(email, pass);
+      const snap = await db.collection('users').doc(cred.user.uid).get();
+      if (snap.exists && snap.data().ativo===false) {
+        await auth.signOut();
+        throw { code:'custom', message:'Esta conta foi suspensa pelo administrador.' };
+      }
+    } else {
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await db.collection('users').doc(cred.user.uid).set({
+        nome, email, role:'user', ativo:true, fotoUrl:'',
+        localizacao:'', gostos:'', likes:[], totalPlays:0, totalDownloads:0,
+        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  } catch (err) {
+    errEl.textContent = err.message || traduzirErro(err.code);
+    errEl.classList.add('show');
+  } finally {
+    btn.textContent = authMode==='login' ? 'Entrar →' : 'Criar Conta →';
+    btn.disabled = false;
+    document.getElementById('auth-loading').textContent = '';
+  }
+}
+
+async function doGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    const result = await auth.signInWithPopup(provider);
+    const user   = result.user;
+    const snap   = await db.collection('users').doc(user.uid).get();
+    if (!snap.exists) {
+      await db.collection('users').doc(user.uid).set({
+        nome: user.displayName||'Utilizador', email: user.email,
+        fotoUrl: user.photoURL||'', role:'user', ativo:true,
+        localizacao:'', gostos:'', likes:[], totalPlays:0, totalDownloads:0,
+        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else if (snap.data().ativo===false) {
+      await auth.signOut();
+      document.getElementById('auth-error').textContent = 'Esta conta foi suspensa.';
+      document.getElementById('auth-error').classList.add('show');
+    }
+  } catch (err) {
+    document.getElementById('auth-error').textContent = traduzirErro(err.code);
+    document.getElementById('auth-error').classList.add('show');
+  }
+}
+
+function doLogout() {
+  auth.signOut();
+}
+
+function traduzirErro(code) {
+  const m = {
+    'auth/email-already-in-use':'Email já está em uso.',
+    'auth/invalid-email':'Email inválido.',
+    'auth/weak-password':'Password muito fraca (mín. 6 caracteres).',
+    'auth/wrong-password':'Password incorrecta.',
+    'auth/user-not-found':'Utilizador não encontrado.',
+    'auth/popup-closed-by-user':'Login cancelado.',
+    'auth/network-request-failed':'Sem ligação à internet.'
+  };
+  return m[code] || 'Ocorreu um erro. Tenta novamente.';
+}
+
+// ══════════════════════════════════════════
+//  AUTH STATE — arranque principal
+// ══════════════════════════════════════════
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    document.getElementById('auth-overlay').style.display = 'flex';
+    if (unsubTracks) { unsubTracks(); unsubTracks = null; }
+    return;
+  }
+  document.getElementById('auth-overlay').style.display = 'none';
+  currentUser = user;
+
+  const snap = await db.collection('users').doc(user.uid).get();
+  userProfile = snap.data() || {};
+
+  // Sidebar
+  const nome = userProfile.nome || user.displayName || 'Utilizador';
+  document.querySelectorAll('.user-name-display').forEach(el => el.textContent = nome);
+  document.getElementById('sb-av').textContent = nome[0].toUpperCase();
+  if (userProfile.fotoUrl) {
+    document.getElementById('sb-av').innerHTML = `<img src="${userProfile.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    const fanAv = document.getElementById('fan-av');
+    fanAv.innerHTML = `<img src="${userProfile.fotoUrl}" style="width:100%;height:100%;object-fit:cover">`;
+  } else {
+    document.getElementById('fan-av-initial').textContent = nome[0].toUpperCase();
+  }
+
+  // Saudação
+  const h = new Date().getHours();
+  const saud = h<12?'Bom dia':'h<18?Boa tarde':'Boa noite';
+  document.getElementById('greeting').innerHTML = `${h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'}, ${nome.split(' ')[0]} 👋<small>O que vamos ouvir hoje?</small>`;
+
+  // Role
+  if (userProfile.role==='admin') {
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display='');
+    document.getElementById('sb-role').textContent = '⚡ General';
+    document.getElementById('fan-badge-role').textContent = '⚡ General';
+    monitorMsgsNaoLidas();
+  }
+
+  // Stats do fã
+  const likes = (userProfile.likes||[]).length;
+  document.getElementById('fan-s-likes').textContent = likes;
+  document.getElementById('fan-s-plays').textContent = userProfile.totalPlays||0;
+  document.getElementById('fan-s-dl').textContent    = userProfile.totalDownloads||0;
+
+  // Carregar músicas em tempo real
+  unsubTracks = db.collection('playlist').orderBy('ordem','desc').onSnapshot(snap => {
+    allTracks = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderAll();
+    actualizarHero();
+    actualizarBadge();
+  });
+
+  // Fan top tracks
+  loadFanTopTracks();
+  loadFanFavorites();
+});
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+const COLORS = [
+  'linear-gradient(135deg,#ec9731,#f5b554)',
+  'linear-gradient(135deg,#314595,#223488)',
+  'linear-gradient(135deg,#223488,#314595)',
+  'linear-gradient(135deg,#ec9731,#314595)',
+  'linear-gradient(135deg,#314595,#ec9731)',
+  'linear-gradient(135deg,#1a2a6c,#314595)',
+];
+const TYPE_MAP  = { album:'type-album', ep:'type-ep', single:'type-single', mixtape:'type-mixtape' };
+const TYPE_LBL  = { album:'Álbum', ep:'EP', single:'Single', mixtape:'Mixtape' };
+
+function getArtBg(t, idx) {
+  return t.capa ? `url(${t.capa}) center/cover` : COLORS[idx%COLORS.length];
+}
+
+function trackRowHTML(t, idx) {
+  const isLiked = (userProfile?.likes||[]).includes(t.id);
+  const bg = getArtBg(t, idx);
+  const isPlay = currentIdx===idx && isPlaying;
+  return `
+  <div class="track-row ${currentIdx===idx?'playing':''}" onclick="playTrack(${idx})">
+    <div class="track-num">${isPlay ? '▶' : idx+1}</div>
+    <div class="track-info">
+      <div class="track-thumb" style="background:${bg}">${t.capa?'':'🎵'}</div>
+      <div><div class="track-name">${t.titulo||t.title||'—'}</div><div class="track-artist">${t.artista||t.artist||'—'}</div></div>
+    </div>
+    <div class="track-album" style="font-size:.85rem;color:rgba(255,255,255,.5)">${t.album||'—'}</div>
+    <div><span class="card-type ${TYPE_MAP[t.tipo?.toLowerCase()]||TYPE_MAP[t.cat]||'type-single'}">${TYPE_LBL[t.tipo?.toLowerCase()]||TYPE_LBL[t.cat]||t.tipo||'Single'}</span></div>
+    <div class="track-duration">${t.dur||t.duracao||'—'}</div>
+    <div class="track-actions">
+      <button class="icon-btn ${isLiked?'liked':''}" onclick="event.stopPropagation();handleLike('${t.id}',this)">${isLiked?'♥':'♡'}</button>
+      <button class="icon-btn" onclick="event.stopPropagation();handleDownload('${t.id}','${t.url||''}')" title="Download">⬇</button>
+    </div>
+  </div>`;
+}
+
+function cardHTML(t, idx) {
+  const bg = getArtBg(t, idx);
+  const cat = t.tipo?.toLowerCase()||t.cat||'single';
+  return `<div class="card" onclick="playTrack(${idx})">
+    <div class="card-art" style="background:${bg}">${t.capa?`<img src="${t.capa}">`:'🎵'}
+      <div class="play-ov"><span>▶</span></div>
+    </div>
+    <span class="card-type ${TYPE_MAP[cat]||'type-single'}">${TYPE_LBL[cat]||t.tipo||'Single'}</span>
+    <div class="card-name">${t.titulo||t.title||'—'}</div>
+    <div class="card-sub">${t.artista||t.artist||'—'}</div>
+  </div>`;
+}
+
+function renderAll() {
+  const active = allTracks.filter(t => !t.oculto);
+
+  // Home tracks
+  const elHome = document.getElementById('track-list-home');
+  if (elHome) elHome.innerHTML = active.length
+    ? active.slice(0,8).map((t,i) => trackRowHTML(t,i)).join('')
+    : '<div class="empty-state"><div class="e-ico">🎵</div><p>Sem músicas publicadas ainda.</p></div>';
+
+  // Library
+  applyLibraryFilter(currentCatFilter);
+
+  // Search
+  const elSearch = document.getElementById('track-list-search');
+  if (elSearch && elSearch.children.length===0) elSearch.innerHTML = active.map((t,i) => trackRowHTML(t,i)).join('');
+
+  // Cards home
+  const cg = document.getElementById('card-grid-home');
+  if (cg) cg.innerHTML = active.length
+    ? active.slice(0,6).map((t,i) => cardHTML(t,i)).join('')
+    : '<div class="empty-state" style="grid-column:1/-1"><div class="e-ico">💿</div><p>Sem conteúdo</p></div>';
+
+  // Category grids
+  ['albums','eps','singles','mixtapes'].forEach(cat => {
+    const key = {albums:'album',eps:'ep',singles:'single',mixtapes:'mixtape'}[cat];
+    const el  = document.getElementById('grid-'+cat);
+    if (!el) return;
+    const filtered = active.filter(t => (t.tipo?.toLowerCase()||t.cat)===key);
+    el.innerHTML = filtered.length
+      ? filtered.map((t,i) => cardHTML(t, active.indexOf(t))).join('')
+      : `<div class="empty-state" style="grid-column:1/-1"><div class="e-ico">📭</div><p>Sem ${TYPE_LBL[key]} disponíveis</p></div>`;
+  });
+
+  // Admin table
+  renderAdminTable(allTracks);
+}
+
+function applyLibraryFilter(cat) {
+  currentCatFilter = cat;
+  const active = allTracks.filter(t => !t.oculto);
+  const filtered = cat==='all' ? active : active.filter(t => (t.tipo?.toLowerCase()||t.cat)===cat);
+  const el = document.getElementById('track-list-lib');
+  if (!el) return;
+  el.innerHTML = filtered.length
+    ? filtered.map((t,i) => trackRowHTML(t, active.indexOf(t))).join('')
+    : `<div class="empty-state"><div class="e-ico">📭</div><p>Sem músicas nesta categoria</p></div>`;
+}
+
+function actualizarHero() {
+  const active = allTracks.filter(t => !t.oculto);
+  if (!active.length) return;
+  const t = active[0];
+  const heroArt = document.getElementById('hero-art');
+  if (t.capa) heroArt.innerHTML = `<img src="${t.capa}" style="width:100%;height:100%;object-fit:cover;border-radius:18px">`;
+  document.getElementById('hero-title').textContent = t.titulo||t.title||'Sons Bwe Fixes';
+  document.getElementById('hero-sub').textContent   = (t.artista||t.artist||'') + (t.tipo?' · '+t.tipo:'');
+}
+
+function actualizarBadge() {
+  const active = allTracks.filter(t => !t.oculto);
+  const el = document.getElementById('badge-count');
+  if (el) el.textContent = active.length;
+}
+
+// ══════════════════════════════════════════
+//  PLAYER — áudio real via HTML5
+// ══════════════════════════════════════════
+function playTrack(idx) {
+  const active = allTracks.filter(t => !t.oculto);
+  if (!active[idx]) return;
+  currentIdx = idx;
+  const t = active[idx];
+
+  // Player UI
+  const bg = getArtBg(t, idx);
+  const thumb = document.getElementById('player-thumb');
+  thumb.style.background = t.capa ? 'none' : bg;
+  thumb.innerHTML = t.capa ? `<img src="${t.capa}" style="width:100%;height:100%;object-fit:cover">` : '🎵';
+  document.getElementById('player-name').textContent   = t.titulo||t.title||'—';
+  document.getElementById('player-artist').textContent = t.artista||t.artist||'—';
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('time-curr').textContent     = '0:00';
+  document.getElementById('time-total').textContent    = t.dur||t.duracao||'0:00';
+
+  // Like state
+  const isLiked = (userProfile?.likes||[]).includes(t.id);
+  document.getElementById('player-like-btn').classList.toggle('liked', isLiked);
+  document.getElementById('player-like-btn').textContent = isLiked ? '♥' : '♡';
+
+  // Áudio
+  if (audioEl) { audioEl.pause(); audioEl = null; }
+  clearInterval(progressInterval);
+
+  if (t.url) {
+    audioEl = new Audio(t.url);
+    audioEl.volume = parseFloat(document.getElementById('vol-fill').style.width)||0.7;
+    audioEl.play().catch(() => {});
+    isPlaying = true;
+    document.getElementById('play-btn').textContent = '⏸';
+
+    audioEl.addEventListener('timeupdate', () => {
+      if (!audioEl.duration) return;
+      const pct = (audioEl.currentTime / audioEl.duration) * 100;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('time-curr').textContent = fmtTime(audioEl.currentTime);
+      document.getElementById('time-total').textContent = fmtTime(audioEl.duration);
+    });
+    audioEl.addEventListener('ended', () => { if (isRepeat) { audioEl.currentTime=0; audioEl.play(); } else nextTrack(); });
+
+    // Incrementar plays
+    if (currentUser) {
+      db.collection('playlist').doc(t.id).update({ plays: firebase.firestore.FieldValue.increment(1) }).catch(()=>{});
+      db.collection('users').doc(currentUser.uid).update({ totalPlays: firebase.firestore.FieldValue.increment(1) }).catch(()=>{});
+    }
+  } else {
+    // Sem URL — simular progresso
+    isPlaying = true;
+    document.getElementById('play-btn').textContent = '⏸';
+    const total = parseDur(t.dur||'3:00');
+    let elapsed = 0;
+    progressInterval = setInterval(() => {
+      if (!isPlaying) return;
+      elapsed++;
+      document.getElementById('progress-fill').style.width = Math.min((elapsed/total)*100,100)+'%';
+      document.getElementById('time-curr').textContent = fmtTime(elapsed);
+      if (elapsed>=total) { clearInterval(progressInterval); isRepeat ? playTrack(idx) : nextTrack(); }
+    }, 1000);
+  }
+
+  renderAll();
+  showToast('▶ ' + (t.titulo||t.title||'—'));
+}
+
+function fmtTime(sec) {
+  const m = Math.floor(sec/60); const s = Math.floor(sec%60);
+  return m+':'+String(s).padStart(2,'0');
+}
+function parseDur(str) {
+  const parts = String(str).split(':');
+  return parts.length===2 ? parseInt(parts[0])*60+parseInt(parts[1]) : 180;
+}
+
+function togglePlay() {
+  if (!audioEl && allTracks.filter(t=>!t.oculto).length>0) { playTrack(currentIdx); return; }
+  if (audioEl) {
+    if (isPlaying) { audioEl.pause(); isPlaying=false; document.getElementById('play-btn').textContent='▶'; }
+    else { audioEl.play(); isPlaying=true; document.getElementById('play-btn').textContent='⏸'; }
+  }
+}
+
+function nextTrack() {
+  const n = allTracks.filter(t=>!t.oculto).length;
+  playTrack(isShuffle ? Math.floor(Math.random()*n) : (currentIdx+1)%n);
+}
+function prevTrack() {
+  const n = allTracks.filter(t=>!t.oculto).length;
+  playTrack((currentIdx-1+n)%n);
+}
+function toggleShuffle() { isShuffle=!isShuffle; document.getElementById('shuffle-btn').classList.toggle('active',isShuffle); showToast(isShuffle?'🔀 Aleatório activado':'🔀 Aleatório desactivado'); }
+function toggleRepeat()  { isRepeat=!isRepeat;   document.getElementById('repeat-btn').classList.toggle('active',isRepeat);   showToast(isRepeat?'🔁 Repetir activado':'🔁 Repetir desactivado'); }
+function seekTo(e, bar) {
+  const pct = Math.max(0,Math.min(1,(e.clientX-bar.getBoundingClientRect().left)/bar.offsetWidth));
+  document.getElementById('progress-fill').style.width = pct*100+'%';
+  if (audioEl) audioEl.currentTime = pct * audioEl.duration;
+}
+function setVolume(e, bar) {
+  const pct = Math.max(0,Math.min(1,(e.clientX-bar.getBoundingClientRect().left)/bar.offsetWidth));
+  document.getElementById('vol-fill').style.width = pct*100+'%';
+  if (audioEl) audioEl.volume = pct;
+}
+
+// ══════════════════════════════════════════
+//  LIKE
+// ══════════════════════════════════════════
+async function handleLike(trackId, btn) {
+  if (!currentUser) return showToast('🔒 Faz login para dar like.');
+  const likes = userProfile?.likes || [];
+  const isLiked = likes.includes(trackId);
+  const newLikes = isLiked ? likes.filter(id=>id!==trackId) : [...likes, trackId];
+
+  await db.collection('users').doc(currentUser.uid).update({ likes: newLikes });
+  await db.collection('playlist').doc(trackId).update({ likes: firebase.firestore.FieldValue.increment(isLiked?-1:1) });
+
+  userProfile.likes = newLikes;
+  btn.classList.toggle('liked', !isLiked);
+  btn.textContent = !isLiked ? '♥' : '♡';
+  document.getElementById('fan-s-likes').textContent = newLikes.length;
+  showToast(!isLiked ? '❤️ Adicionado aos favoritos!' : '💔 Removido dos favoritos');
+  loadFanFavorites();
+}
+
+async function addToFavorites() {
+  const active = allTracks.filter(t=>!t.oculto);
+  if (active.length) await handleLike(active[currentIdx].id, document.getElementById('player-like-btn'));
+}
+
+function togglePlayerLike() {
+  const active = allTracks.filter(t=>!t.oculto);
+  if (active[currentIdx]) handleLike(active[currentIdx].id, document.getElementById('player-like-btn'));
+}
+
+// ══════════════════════════════════════════
+//  DOWNLOAD
+// ══════════════════════════════════════════
+async function handleDownload(trackId, url) {
+  if (!url) return showToast('⚠️ Link de áudio não disponível.');
+  if (currentUser) {
+    db.collection('playlist').doc(trackId).update({ downloads: firebase.firestore.FieldValue.increment(1) }).catch(()=>{});
+    db.collection('users').doc(currentUser.uid).update({ totalDownloads: firebase.firestore.FieldValue.increment(1) }).catch(()=>{});
+    userProfile.totalDownloads = (userProfile.totalDownloads||0)+1;
+    document.getElementById('fan-s-dl').textContent = userProfile.totalDownloads;
+  }
+  const a = document.createElement('a'); a.href=url; a.download=''; a.target='_blank'; a.click();
+  showToast('⬇️ Download iniciado!');
+}
+
+function handleDownloadCurrent() {
+  const active = allTracks.filter(t=>!t.oculto);
+  if (active[currentIdx]) handleDownload(active[currentIdx].id, active[currentIdx].url||'');
+}
+
+// ══════════════════════════════════════════
+//  FILTROS
+// ══════════════════════════════════════════
+function filterTracks(q, scope) {
+  const lower = q.toLowerCase();
+  const active = allTracks.filter(t=>!t.oculto);
+  const filtered = active.filter(t =>
+    (t.titulo||t.title||'').toLowerCase().includes(lower) ||
+    (t.artista||t.artist||'').toLowerCase().includes(lower) ||
+    (t.album||'').toLowerCase().includes(lower)
+  );
+  const id = scope==='lib' ? 'track-list-lib' : scope==='search' ? 'track-list-search' : 'track-list-home';
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = filtered.length
+    ? filtered.map((t,i) => trackRowHTML(t, active.indexOf(t))).join('')
+    : `<div class="empty-state"><div class="e-ico">🔍</div><p>Sem resultados para "${q}"</p></div>`;
+}
+
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  applyLibraryFilter(cat);
+}
+
+// ══════════════════════════════════════════
+//  NAVEGAÇÃO
+// ══════════════════════════════════════════
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('page-'+page);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    const txt = n.textContent.toLowerCase();
+    const map = { home:'início', library:'biblioteca', albums:'álbuns', eps:'eps', singles:'singles', mixtapes:'mixtapes', fan:'perfil', admin:'admin', search:'descobrir', contacto:'contacto' };
+    if (map[page] && txt.includes(map[page])) n.classList.add('active');
+  });
+  if (page==='search') setTimeout(()=>document.getElementById('search-input')?.focus(),100);
+  if (page==='admin'  && userProfile?.role==='admin') loadAdminData();
+  if (page==='fan')   { loadFanTopTracks(); loadFanFavorites(); }
+}
+
+// ══════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════
+function fanTab(tab, btn) {
+  ['activity','favorites','downloads'].forEach(t => { const el=document.getElementById('fan-'+t); if(el) el.style.display=t===tab?'':'none'; });
+  document.querySelectorAll('.fan-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (tab==='favorites') loadFanFavorites();
+  if (tab==='downloads') loadFanDownloads();
+}
+
+function adminTab(tab, btn) {
+  ['music','add','users','msgs','analytics'].forEach(t => { const el=document.getElementById('admin-'+t); if(el) el.style.display=t===tab?'':'none'; });
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (tab==='users')     loadAdminUsers();
+  if (tab==='msgs')      loadAdminMsgs();
+  if (tab==='analytics') loadAnalytics();
+  if (tab==='music')     renderAdminTable(allTracks);
+}
+
+// ══════════════════════════════════════════
+//  FAN — Top Tracks, Favoritos, Downloads
+// ══════════════════════════════════════════
+function loadFanTopTracks() {
+  const sorted = [...allTracks].filter(t=>!t.oculto).sort((a,b)=>(b.plays||0)-(a.plays||0)).slice(0,5);
+  const el = document.getElementById('fan-top-tracks');
+  if (!el) return;
+  el.innerHTML = sorted.length ? sorted.map((t,i) => `
+    <div class="activity-item">
+      <div class="activity-dot"></div>
+      <div class="activity-text"><strong>${t.titulo||t.title}</strong> — ${t.artista||t.artist}</div>
+      <div class="activity-time">${t.plays||0} plays</div>
+    </div>`).join('') : '<div class="empty-state"><div class="e-ico">🎵</div><p>Sem dados</p></div>';
+}
+
+function loadFanFavorites() {
+  const likes  = userProfile?.likes || [];
+  const favs   = allTracks.filter(t => likes.includes(t.id));
+  const el     = document.getElementById('fan-fav-list');
+  if (!el) return;
+  const active = allTracks.filter(t=>!t.oculto);
+  el.innerHTML = favs.length ? favs.map(t => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:#ec9731"></div>
+      <div class="activity-text" style="cursor:pointer" onclick="playTrack(${active.indexOf(t)})"><strong>${t.titulo||t.title}</strong> — ${t.artista||t.artist}</div>
+      <button class="icon-btn liked" onclick="handleLike('${t.id}',this)">♥</button>
+    </div>`).join('') : '<div class="empty-state"><div class="e-ico">❤️</div><p>Ainda sem favoritos</p></div>';
+}
+
+function loadFanDownloads() {
+  const el = document.getElementById('fan-dl-list');
+  if (!el) return;
+  el.innerHTML = `<div class="activity-item"><div class="activity-dot" style="background:#4ade80"></div><div class="activity-text">Total de downloads: <strong>${userProfile?.totalDownloads||0}</strong></div></div>`;
+}
+
+// ══════════════════════════════════════════
+//  ADMIN — Músicas
+// ══════════════════════════════════════════
+function renderAdminTable(tracks) {
+  const el = document.getElementById('admin-track-list');
+  if (!el) return;
+  if (!tracks.length) { el.innerHTML='<div class="empty-state"><div class="e-ico">🎵</div><p>Sem músicas</p></div>'; return; }
+  el.innerHTML = tracks.map((t,i) => {
+    const cat = t.tipo?.toLowerCase()||t.cat||'single';
+    return `<div class="admin-row ${t.oculto?'disabled':''}">
+      <div style="color:rgba(255,255,255,.3);font-size:.85rem">${i+1}</div>
+      <div><div style="font-weight:600;font-size:.92rem">${t.titulo||t.title||'—'}</div><div style="font-size:.78rem;color:rgba(255,255,255,.38)">${t.artista||t.artist||'—'}</div></div>
+      <div><span class="card-type ${TYPE_MAP[cat]||'type-single'}">${TYPE_LBL[cat]||t.tipo||'Single'}</span></div>
+      <div style="color:rgba(255,255,255,.5);font-size:.88rem">${t.dur||t.duracao||'—'}</div>
+      <div style="font-size:.88rem">${(t.plays||0).toLocaleString('pt-PT')}</div>
+      <div style="font-size:.88rem">${(t.likes||0).toLocaleString('pt-PT')}</div>
+      <div><span class="status-badge ${t.oculto?'status-disabled':'status-active'}">${t.oculto?'Oculto':'Visível'}</span></div>
+      <div class="admin-actions">
+        <button class="a-btn" onclick="openEditTrack('${t.id}')" title="Editar">✏️</button>
+        <button class="a-btn warn" onclick="toggleOcultar('${t.id}',${!!t.oculto})" title="${t.oculto?'Mostrar':'Ocultar'}">${t.oculto?'👁️':'🙈'}</button>
+        <button class="a-btn danger" onclick="deleteTrack('${t.id}')" title="Eliminar">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function adminAddTrack() {
+  const titulo  = document.getElementById('add-title').value.trim();
+  const artista = document.getElementById('add-artist').value.trim();
+  const url     = document.getElementById('add-url').value.trim();
+  const cat     = document.getElementById('add-cat').value;
+  if (!titulo || !artista) return showToast('⚠️ Título e artista são obrigatórios.');
+
+  try {
+    await db.collection('playlist').add({
+      titulo, artista, url,
+      album:    document.getElementById('add-album').value.trim(),
+      tipo:     cat.charAt(0).toUpperCase()+cat.slice(1),
+      cat,
+      dur:      document.getElementById('add-dur').value.trim()||'0:00',
+      genero:   document.getElementById('add-genre').value.trim(),
+      capa:     document.getElementById('add-cover-url').value.trim(),
+      oculto:   false,
+      plays:    0, likes: 0, downloads: 0,
+      ordem:    Date.now(),
+      dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ['add-title','add-artist','add-album','add-dur','add-genre','add-url','add-cover-url'].forEach(id => document.getElementById(id).value='');
+    showToast('✅ Música publicada com sucesso!');
+    adminTab('music', document.querySelector('.admin-tab'));
+  } catch(e) { showToast('❌ Erro: '+e.message); }
+}
+
+function openEditTrack(id) {
+  const t = allTracks.find(t=>t.id===id);
+  if (!t) return;
+  editingTrackId = id;
+  document.getElementById('et-title').value  = t.titulo||t.title||'';
+  document.getElementById('et-artist').value = t.artista||t.artist||'';
+  document.getElementById('et-album').value  = t.album||'';
+  document.getElementById('et-cat').value    = t.cat||t.tipo?.toLowerCase()||'single';
+  document.getElementById('et-dur').value    = t.dur||t.duracao||'';
+  document.getElementById('et-url').value    = t.url||'';
+  document.getElementById('et-cover').value  = t.capa||'';
+  document.getElementById('modal-edit-track').classList.add('open');
+}
+
+async function saveEditTrack() {
+  if (!editingTrackId) return;
+  const cat = document.getElementById('et-cat').value;
+  try {
+    await db.collection('playlist').doc(editingTrackId).update({
+      titulo:  document.getElementById('et-title').value,
+      artista: document.getElementById('et-artist').value,
+      album:   document.getElementById('et-album').value,
+      cat,
+      tipo:    cat.charAt(0).toUpperCase()+cat.slice(1),
+      dur:     document.getElementById('et-dur').value,
+      url:     document.getElementById('et-url').value,
+      capa:    document.getElementById('et-cover').value,
+    });
+    document.getElementById('modal-edit-track').classList.remove('open');
+    showToast('💾 Alterações guardadas!');
+  } catch(e) { showToast('❌ Erro: '+e.message); }
+}
+
+async function toggleOcultar(id, estado) {
+  await db.collection('playlist').doc(id).update({ oculto: !estado });
+  showToast(!estado ? '🙈 Música ocultada' : '👁️ Música visível');
+}
+
+async function deleteTrack(id) {
+  if (!confirm('Eliminar esta música? Acção irreversível.')) return;
+  await db.collection('playlist').doc(id).delete();
+  showToast('🗑️ Música eliminada');
+}
+
+function filterAdmin(q) {
+  const lower = q.toLowerCase();
+  const filtered = allTracks.filter(t => (t.titulo||t.title||'').toLowerCase().includes(lower)||(t.artista||t.artist||'').toLowerCase().includes(lower));
+  renderAdminTable(filtered);
+}
+function filterAdminCat(cat) {
+  renderAdminTable(cat ? allTracks.filter(t=>(t.cat||t.tipo?.toLowerCase())===cat) : allTracks);
+}
+
+// ══════════════════════════════════════════
+//  ADMIN — Utilizadores
+// ══════════════════════════════════════════
+function loadAdminUsers() {
+  db.collection('users').onSnapshot(snap => {
+    const el = document.getElementById('admin-users-list');
+    if (!el) return;
+    el.innerHTML = '';
+    if (snap.empty) { el.innerHTML='<div class="empty-state"><div class="e-ico">👥</div><p>Sem utilizadores</p></div>'; return; }
+    snap.forEach(doc => {
+      const u = doc.data(); const ativo = u.ativo!==false;
+      el.innerHTML += `<div class="admin-row" style="grid-template-columns:1fr 120px 100px 110px">
+        <div><div style="font-weight:600">${u.nome||'Sem nome'}</div><div style="font-size:.8rem;color:rgba(255,255,255,.4)">${u.email||''}</div></div>
+        <div><span class="status-badge ${ativo?'status-active':'status-disabled'}">${ativo?'Activo':'Banido'}</span></div>
+        <div style="font-size:.82rem;color:rgba(255,255,255,.5);text-transform:uppercase">${u.role||'user'}</div>
+        <div class="admin-actions" style="justify-content:flex-end">
+          <button class="a-btn warn" onclick="toggleUserStatus('${doc.id}',${ativo})" title="${ativo?'Banir':'Reactivar'}">${ativo?'🚫':'✅'}</button>
+          <button class="a-btn danger" onclick="deleteUser('${doc.id}')" title="Eliminar">🗑️</button>
+        </div>
+      </div>`;
+    });
+    document.getElementById('st-users').textContent = snap.size;
+  });
+}
+
+async function toggleUserStatus(id, ativo) {
+  await db.collection('users').doc(id).update({ ativo: !ativo });
+  showToast(!ativo ? '✅ Utilizador reactivado' : '🚫 Utilizador banido');
+}
+async function deleteUser(id) {
+  if (!confirm('Eliminar conta? Irreversível.')) return;
+  await db.collection('users').doc(id).delete();
+  showToast('🗑️ Conta eliminada');
+}
+
+// ══════════════════════════════════════════
+//  ADMIN — Mensagens / Parcerias
+// ══════════════════════════════════════════
+function loadAdminMsgs() {
+  db.collection('contactos').orderBy('data','desc').onSnapshot(snap => {
+    const el = document.getElementById('admin-msgs-list');
+    if (!el) return;
+    if (snap.empty) { el.innerHTML='<div class="empty-state"><div class="e-ico">✉️</div><p>Sem mensagens</p></div>'; return; }
+    el.innerHTML = '';
+    snap.forEach(doc => {
+      const p = doc.data(); const isLido = p.lido===true;
+      const data = p.data ? p.data.toDate().toLocaleString('pt-PT') : '—';
+      el.innerHTML += `<div class="fan-widget" style="${isLido?'opacity:.55':'border-color:rgba(236,151,49,.3)'}">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+          <div>
+            <span class="card-type type-album">${p.assunto||'Parceria'}</span>
+            ${!isLido?'<span style="font-family:var(--font-b);font-size:.68rem;color:#EF3C54;text-transform:uppercase;letter-spacing:1px;margin-left:6px">● NOVO</span>':''}
+          </div>
+          <button onclick="toggleLidoMsg('${doc.id}',${isLido})" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:${isLido?'#314595':'rgba(255,255,255,.25)'}">
+            <i class="fa-solid ${isLido?'fa-circle-check':'fa-circle'}"></i>
+          </button>
+        </div>
+        <p style="font-family:var(--font-b);font-weight:700;font-size:1rem">${p.nome||'—'}</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:10px">${p.email||''}</p>
+        <p style="font-family:var(--font-b);font-size:.88rem;color:rgba(255,255,255,.6);line-height:1.5;font-style:italic">"${p.mensagem||p.descricao||'Sem mensagem'}"</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid rgba(49,69,149,.2)">
+          <span style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.3)">${data}</span>
+          <div style="display:flex;gap:6px">
+            <a href="mailto:${p.email}" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);text-decoration:none" title="Responder"><i class="fa-solid fa-reply text-xs"></i></a>
+            <button onclick="deleteMensagem('${doc.id}')" style="width:30px;height:30px;border-radius:8px;background:rgba(255,71,71,.1);border:none;cursor:pointer;color:#ff4747;display:inline-flex;align-items:center;justify-content:center" title="Apagar"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('st-msgs').textContent = snap.size;
+  });
+}
+
+async function toggleLidoMsg(id, estado) { await db.collection('contactos').doc(id).update({ lido: !estado }); }
+async function deleteMensagem(id) {
+  if (!confirm('Eliminar mensagem?')) return;
+  await db.collection('contactos').doc(id).delete();
+  showToast('🗑️ Mensagem eliminada');
+}
+
+function monitorMsgsNaoLidas() {
+  db.collection('contactos').where('lido','==',false).onSnapshot(snap => {
+    const badge = document.getElementById('admin-notif-badge');
+    const msgsBadge = document.getElementById('msgs-badge');
+    if (snap.size > 0) {
+      if (badge) { badge.textContent = snap.size; badge.style.display='flex'; }
+      if (msgsBadge) msgsBadge.style.display='';
+    } else {
+      if (badge) badge.style.display='none';
+      if (msgsBadge) msgsBadge.style.display='none';
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  ADMIN — Analytics
+// ══════════════════════════════════════════
+async function loadAnalytics() {
+  const snap  = await db.collection('playlist').get();
+  let totalPlays=0, totalDl=0;
+  const musicas = [];
+  snap.forEach(doc => {
+    const d = doc.data(); totalPlays+=d.plays||0; totalDl+=d.downloads||0;
+    musicas.push({id:doc.id,...d});
+  });
+  document.getElementById('st-plays').textContent     = totalPlays.toLocaleString('pt-PT');
+  document.getElementById('st-downloads').textContent = totalDl.toLocaleString('pt-PT');
+  document.getElementById('st-musicas').textContent   = snap.size;
+
+  const top5 = musicas.sort((a,b)=>(b.plays||0)-(a.plays||0)).slice(0,5);
+  const el   = document.getElementById('analytics-top');
+  if (!el) return;
+  el.innerHTML = top5.map((t,i) => `
+    <div class="activity-item">
+      <span style="font-family:var(--font-d);font-size:1.1rem;color:rgba(255,255,255,.25);min-width:22px">${i+1}</span>
+      ${t.capa?`<img src="${t.capa}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0">`:'<div style="width:38px;height:38px;border-radius:8px;background:rgba(49,69,149,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">🎵</div>'}
+      <div style="flex:1;min-width:0"><div style="font-weight:600">${t.titulo||t.title||'—'}</div><div style="font-size:.8rem;color:rgba(255,255,255,.4)">${t.artista||t.artist||'—'}</div></div>
+      <span style="font-family:var(--font-d);font-size:.95rem;color:#ec9731">${(t.plays||0).toLocaleString('pt-PT')} plays</span>
+    </div>`).join('') || '<div class="empty-state"><div class="e-ico">📊</div><p>Sem dados ainda</p></div>';
+}
+
+function loadAdminData() {
+  db.collection('playlist').onSnapshot(snap => {
+    document.getElementById('st-musicas').textContent = snap.size;
+    let p=0,d=0; snap.forEach(doc=>{ p+=doc.data().plays||0; d+=doc.data().downloads||0; });
+    document.getElementById('st-plays').textContent     = p.toLocaleString('pt-PT');
+    document.getElementById('st-downloads').textContent = d.toLocaleString('pt-PT');
+  });
+}
+
+// ══════════════════════════════════════════
+//  CONTACTO — Enviar mensagem
+// ══════════════════════════════════════════
+async function enviarContacto() {
+  const nome    = document.getElementById('c-nome').value.trim();
+  const email   = document.getElementById('c-email').value.trim();
+  const assunto = document.getElementById('c-assunto').value;
+  const msg     = document.getElementById('c-msg').value.trim();
+  const btn     = document.getElementById('btn-contacto');
+
+  if (!nome || !email || !msg) return showToast('⚠️ Preenche todos os campos.');
+
+  btn.textContent = 'A ENVIAR...'; btn.disabled = true;
+  try {
+    await db.collection('contactos').add({
+      nome, email, assunto, mensagem: msg, lido: false,
+      data: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ['c-nome','c-email','c-msg'].forEach(id => document.getElementById(id).value='');
+    showToast('✅ Mensagem enviada com sucesso!');
+  } catch(e) { showToast('❌ Erro ao enviar. Tenta novamente.'); }
+  finally { btn.textContent='📤 Enviar Proposta'; btn.disabled=false; }
+}
+
+// ══════════════════════════════════════════
+//  PERFIL — Editar
+// ══════════════════════════════════════════
+function openEditProfileModal() {
+  document.getElementById('ep-nome').value   = userProfile?.nome||'';
+  document.getElementById('ep-local').value  = userProfile?.localizacao||'';
+  document.getElementById('ep-gostos').value = userProfile?.gostos||'';
+  document.getElementById('modal-edit-profile').classList.add('open');
+}
+async function saveProfile() {
+  if (!currentUser) return;
+  const nome = document.getElementById('ep-nome').value.trim();
+  try {
+    await db.collection('users').doc(currentUser.uid).update({
+      nome, localizacao: document.getElementById('ep-local').value.trim(),
+      gostos: document.getElementById('ep-gostos').value.trim()
+    });
+    userProfile.nome = nome;
+    document.querySelectorAll('.user-name-display').forEach(el => el.textContent = nome);
+    document.getElementById('sb-av').textContent = nome[0].toUpperCase();
+    document.getElementById('fan-av-initial').textContent = nome[0].toUpperCase();
+    document.getElementById('modal-edit-profile').classList.remove('open');
+    showToast('💾 Perfil actualizado!');
+  } catch(e) { showToast('❌ Erro ao guardar.'); }
+}
+
+// ══════════════════════════════════════════
+//  MODAL + TOAST
+// ══════════════════════════════════════════
+function closeModal(id, e) {
+  if (e.target===document.getElementById(id)) document.getElementById(id).classList.remove('open');
+}
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
 </body>
 </html>
